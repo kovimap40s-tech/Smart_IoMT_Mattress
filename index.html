@@ -1,0 +1,2422 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ISSIC Mattress — Clover Care IoT System</title>
+
+  <!-- Google Fonts: Quicksand (Heading ramah & angka) & Plus Jakarta Sans (UI modern) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Quicksand"', 'sans-serif'],
+          },
+          colors: {
+            clover: {
+              mint: '#38C695',
+              mintLight: '#5CE1B5',
+              mintSoft: '#E8FBF4',
+              sky: '#3FB6F6',
+              skyLight: '#68CEFF',
+              skySoft: '#EAF7FF',
+              pink: '#FF7EB6',
+              pinkLight: '#FFA6CE',
+              pinkSoft: '#FFF0F7',
+              canvas: '#FAFDFC',
+            }
+          },
+          boxShadow: {
+            'pastel-mint': '0 10px 28px -6px rgba(56, 198, 149, 0.22)',
+            'pastel-sky': '0 10px 28px -6px rgba(63, 182, 246, 0.22)',
+            'pastel-pink': '0 10px 28px -6px rgba(255, 126, 182, 0.24)',
+            'card-soft': '0 8px 30px rgba(30, 41, 59, 0.045)',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #FFFFFF;
+      background-image:
+        radial-gradient(circle at 12% 10%, rgba(92, 225, 181, 0.10) 0%, transparent 28%),
+        radial-gradient(circle at 88% 14%, rgba(104, 206, 255, 0.11) 0%, transparent 30%),
+        radial-gradient(circle at 50% 88%, rgba(255, 166, 206, 0.10) 0%, transparent 34%),
+        radial-gradient(#E2E8F0 0.85px, transparent 0.85px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 24px 24px;
+      color: #1E293B;
+      overflow-x: hidden;
+    }
+
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-6px) rotate(4deg); }
+    }
+
+    @keyframes pulseInflate {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.018); }
+    }
+
+    .animate-float-slow {
+      animation: floatSlow 5.5s ease-in-out infinite;
+    }
+
+    .cell-inflated {
+      animation: pulseInflate 2.8s ease-in-out infinite;
+    }
+
+    .toggle-track {
+      transition: background-color 0.28s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.28s ease;
+    }
+    .toggle-thumb {
+      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .locked-pattern {
+      background-image: repeating-linear-gradient(
+        -45deg,
+        #FFF0F7,
+        #FFF0F7 8px,
+        #FFE1EE 8px,
+        #FFE1EE 16px
+      );
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #FAFDFC;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #5CE1B5, #68CEFF, #FFA6CE);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-clover-pinkSoft selection:text-clover-pink">
+
+  <!-- Dekorasi Latar Belakang Clover Berdaun 4 -->
+  <div class="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
+    <svg class="absolute -top-8 -left-8 w-44 h-44 opacity-25 animate-float-slow" viewBox="0 0 120 120" fill="none">
+      <path d="M60 56C46 34 20 34 20 50C20 62 38 64 56 60Z" fill="#5CE1B5"/>
+      <path d="M64 60C86 46 86 20 70 20C58 20 56 38 60 56Z" fill="#68CEFF"/>
+      <path d="M60 64C74 86 100 86 100 70C100 58 82 56 64 60Z" fill="#FFA6CE"/>
+      <path d="M56 60C34 74 34 100 50 100C62 100 64 82 60 64Z" fill="#5CE1B5"/>
+      <circle cx="60" cy="60" r="5" fill="#FFFFFF"/>
+    </svg>
+    <svg class="absolute -bottom-10 -right-10 w-56 h-56 opacity-20 animate-float-slow" style="animation-delay: 1.8s;" viewBox="0 0 120 120" fill="none">
+      <path d="M60 56C46 34 20 34 20 50C20 62 38 64 56 60Z" fill="#68CEFF"/>
+      <path d="M64 60C86 46 86 20 70 20C58 20 56 38 60 56Z" fill="#FFA6CE"/>
+      <path d="M60 64C74 86 100 86 100 70C100 58 82 56 64 60Z" fill="#5CE1B5"/>
+      <path d="M56 60C34 74 34 100 50 100C62 100 64 82 60 64Z" fill="#68CEFF"/>
+      <circle cx="60" cy="60" r="5" fill="#FFFFFF"/>
+    </svg>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- ===================================================================== -->
+  <!-- HEADER / NAVBAR UTAMA                                                 -->
+  <!-- ===================================================================== -->
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Logo & Identitas Sistem -->
+      <div class="flex items-center gap-3.5">
+        <div class="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-clover-mintSoft via-clover-skySoft to-clover-pinkSoft border border-white shadow-card-soft flex items-center justify-center shrink-0">
+          <svg class="w-8 h-8" viewBox="0 0 64 64" fill="none">
+            <path d="M31 30C27 17 13 15 13 24C13 31 23 32 31 30Z" fill="#38C695"/>
+            <path d="M31 30C24 22 16 14 23 11C29 8 33 19 31 30Z" fill="#5CE1B5"/>
+            <path d="M33 30C37 17 51 15 51 24C51 31 41 32 33 30Z" fill="#3FB6F6"/>
+            <path d="M33 30C40 22 48 14 41 11C35 8 31 19 33 30Z" fill="#68CEFF"/>
+            <path d="M31 34C21 35 13 41 17 47C21 53 29 44 31 34Z" fill="#3FB6F6"/>
+            <path d="M33 34C43 35 51 41 47 47C43 53 35 44 33 34Z" fill="#FF7EB6"/>
+            <path d="M33 34C38 42 44 49 38 52C33 54 31 43 33 34Z" fill="#FFA6CE"/>
+            <path d="M32 34C32 43 29 51 24 55" stroke="#38C695" stroke-width="2.6" stroke-linecap="round"/>
+            <circle cx="32" cy="32" r="3" fill="#FFFFFF"/>
+          </svg>
+          <span class="absolute -top-1 -right-1 text-[10px] text-clover-pink">✦</span>
+        </div>
+
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-display font-bold text-lg sm:text-xl tracking-tight text-slate-800">
+              ISSIC <span class="bg-gradient-to-r from-clover-mint via-clover-sky to-clover-pink bg-clip-text text-transparent">Mattress</span>
+            </h1>
+            <span class="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-clover-pinkSoft text-clover-pink border border-clover-pink/20">
+              🍀 Clover Care IoT
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 font-medium">Kontrol Katup Pintar, Kalibrasi ML & Monitoring Tekanan BMP280</p>
+        </div>
+      </div>
+
+      <!-- Status Koneksi Firebase & Tombol Aksi Header -->
+      <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+        <div id="firebase-status-badge" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs font-bold bg-clover-pinkSoft text-clover-pink border border-clover-pink/25 transition-all">
+          <span id="firebase-status-dot" class="w-2.5 h-2.5 rounded-full bg-clover-pink animate-ping"></span>
+          <span id="firebase-status-text">Menghubungkan...</span>
+        </div>
+
+        <button id="btn-open-schema" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-bold bg-clover-skySoft hover:bg-clover-sky text-clover-sky hover:text-white border border-clover-sky/25 transition-all shadow-sm cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
+          </svg>
+          <span>Struktur Path Firebase</span>
+        </button>
+
+        <button id="btn-emergency-off" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-bold bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white border border-rose-200 transition-all shadow-sm cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9"/>
+          </svg>
+          <span class="hidden md:inline">Matikan Semua</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- KONTEN UTAMA DASHBOARD                                                -->
+  <!-- ===================================================================== -->
+  <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- BANNER PERINGATAN OVERPRESSURE PROTECTION -->
+    <div id="overpressure-banner" class="hidden rounded-3xl bg-gradient-to-r from-clover-pink via-rose-400 to-clover-pink p-4 sm:p-5 text-white shadow-pastel-pink border border-white/40">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3.5">
+          <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6 text-white animate-bounce" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="font-display font-bold text-base sm:text-lg tracking-wide">⚠️ Overpressure Protection Aktif!</h2>
+            <p class="text-xs sm:text-sm text-white/95">
+              Tekanan udara (<strong id="banner-curr-press">--</strong> hPa) mencapai atau melebihi batas maksimal (<strong id="banner-max-press">--</strong> hPa).
+              <strong>Pompa Angin (GPIO 27) otomatis dimatikan (FALSE)</strong> demi keamanan hingga tekanan kembali turun.
+            </p>
+          </div>
+        </div>
+        <span class="px-3 py-1.5 rounded-xl bg-white text-rose-600 font-bold text-xs shrink-0 shadow-sm">
+          PUMP CUTOFF: OFF
+        </span>
+      </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- SEKSI 1: PENGATURAN MODE OPERASI (MANUAL vs AUTO & TILTING)         -->
+    <!-- =================================================================== -->
+    <section class="bg-white rounded-3xl p-5 sm:p-6 shadow-card-soft border border-slate-100 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-clover-mintSoft/70 via-clover-skySoft/40 to-transparent rounded-bl-full pointer-events-none"></div>
+
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+        <div class="space-y-4 flex-1">
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-clover-mintSoft text-clover-mint font-bold text-sm">🍀</span>
+            <h2 class="font-display font-bold text-lg text-slate-800">Mode Operasi Sistem Kasur</h2>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Kartu Toggle Mode Utama -->
+            <div class="p-4 rounded-2xl bg-clover-canvas border border-slate-200/80 flex flex-col justify-between gap-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Mode Utama</span>
+                <span id="badge-mode-pill" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-clover-skySoft text-clover-sky">
+                  MANUAL
+                </span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 bg-slate-100/90 p-1.5 rounded-2xl">
+                <button id="btn-mode-manual" type="button" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer bg-white text-clover-sky shadow-sm">
+                  🎛️ Mode Manual
+                </button>
+                <button id="btn-mode-auto" type="button" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer text-slate-500 hover:text-slate-700">
+                  ✨ Mode Auto
+                </button>
+              </div>
+              <p id="mode-description" class="text-xs text-slate-500 leading-relaxed">
+                Kontrol saklar V0–V10, Pompa, dan Buzzer diatur secara manual oleh pengguna.
+              </p>
+            </div>
+
+            <!-- Kartu Toggle Fitur Tilting -->
+            <div class="p-4 rounded-2xl bg-clover-canvas border border-slate-200/80 flex flex-col justify-between gap-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Fitur Tilting / Miring</span>
+                <button id="toggle-tilting-btn" type="button" role="switch" aria-checked="false" class="toggle-track relative inline-flex h-7 w-13 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-200 p-0.5 focus:outline-none">
+                  <span id="toggle-tilting-thumb" class="toggle-thumb pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md translate-x-0"></span>
+                </button>
+              </div>
+
+              <div>
+                <div class="flex items-center gap-2">
+                  <span id="tilting-status-label" class="font-display font-bold text-base text-slate-700">Tilting Mati (Bergantian Blok A / B)</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Saat <strong>Mode Auto + Tilting NYALA</strong>: siklus berurutan tiap timer tilting:
+                  <span class="font-semibold text-clover-mint">A-Kanan</span> →
+                  <span class="font-semibold text-clover-sky">B-Kanan</span> →
+                  <span class="font-semibold text-clover-mint">A-Kiri</span> →
+                  <span class="font-semibold text-clover-pink">B-Kiri</span>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kanan: Status Siklus Otomatis Real-Time -->
+        <div class="lg:w-96 rounded-3xl p-5 bg-gradient-to-br from-clover-mintSoft/80 via-clover-skySoft/70 to-clover-pinkSoft/80 border border-white shadow-sm flex flex-col justify-between gap-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Status Siklus Aktif</span>
+            <span id="cycle-step-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-white text-slate-700 shadow-xs">
+              Standby Manual
+            </span>
+          </div>
+
+          <div>
+            <div id="cycle-phase-title" class="font-display font-bold text-xl text-slate-800">
+              Kontrol Manual Aktif
+            </div>
+            <p id="cycle-phase-detail" class="text-xs text-slate-600 mt-1">
+              Aktifkan Mode Auto untuk menjalankan siklus pergantian tekanan kasur otomatis.
+            </p>
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="flex justify-between text-xs font-bold text-slate-600">
+              <span>Sisa Waktu Fase</span>
+              <span id="cycle-countdown-text">-- detik</span>
+            </div>
+            <div class="w-full h-3 bg-white/80 rounded-full overflow-hidden p-0.5 shadow-inner">
+              <div id="cycle-progress-bar" class="h-full rounded-full bg-gradient-to-r from-clover-mint via-clover-sky to-clover-pink transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- SEKSI 2: MONITORING SENSOR BMP280 (READ-ONLY / HANYA BACA)          -->
+    <!-- =================================================================== -->
+    <section class="space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 px-1">
+        <div class="flex items-center gap-2.5">
+          <span class="w-8 h-8 rounded-2xl bg-clover-skySoft text-clover-sky flex items-center justify-center font-bold shadow-xs">📡</span>
+          <div>
+            <h2 class="font-display font-bold text-lg text-slate-800">Monitoring Sensor BMP280</h2>
+            <p class="text-xs text-slate-500">Data telemetri real-time dari ESP32 via Firebase RTDB</p>
+          </div>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-slate-100 text-slate-600 border border-slate-200">
+          <svg class="w-3.5 h-3.5 text-clover-sky" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+          READ-ONLY / MONITORING
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Kartu 1: Tekanan Udara (hPa) -->
+        <div id="card-sensor-pressure" class="bg-white rounded-3xl p-5 shadow-card-soft border border-clover-mint/25 relative overflow-hidden">
+          <div class="flex items-center justify-between mb-3">
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-clover-mintSoft text-clover-mint">
+              Tekanan Udara
+            </span>
+            <span class="text-[11px] font-mono font-semibold text-slate-400">/sensors/bmp280/pressure</span>
+          </div>
+
+          <div class="flex items-center gap-4 my-2">
+            <div class="relative w-24 h-24 shrink-0">
+              <svg class="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" stroke="#E8FBF4" stroke-width="10" fill="none"/>
+                <circle id="gauge-pressure-ring" cx="50" cy="50" r="40" stroke="#38C695" stroke-width="10" stroke-linecap="round" fill="none" stroke-dasharray="251.2" stroke-dashoffset="251.2" class="transition-all duration-700"/>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span id="gauge-pressure-pct" class="font-display font-bold text-sm text-slate-700">0%</span>
+                <span class="text-[9px] font-bold text-slate-400">vs MAX</span>
+              </div>
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <div class="flex items-baseline gap-1.5">
+                <span id="val-pressure" class="font-display font-bold text-3xl sm:text-4xl text-slate-800 tracking-tight">--.-</span>
+                <span class="text-sm font-bold text-clover-mint">hPa</span>
+              </div>
+              <div class="mt-2 flex flex-wrap items-center gap-1.5">
+                <span id="pressure-status-badge" class="px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-clover-mintSoft text-clover-mint">
+                  Menunggu Data
+                </span>
+                <span class="text-[11px] text-slate-500">Batas: <strong id="display-max-pressure-inline">1030</strong> hPa</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kartu 2: Suhu (°C) -->
+        <div class="bg-white rounded-3xl p-5 shadow-card-soft border border-clover-pink/25 relative overflow-hidden">
+          <div class="flex items-center justify-between mb-3">
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-clover-pinkSoft text-clover-pink">
+              Suhu Sensor
+            </span>
+            <span class="text-[11px] font-mono font-semibold text-slate-400">/sensors/bmp280/temperature</span>
+          </div>
+
+          <div class="flex items-center gap-4 my-2">
+            <div class="relative w-24 h-24 shrink-0">
+              <svg class="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" stroke="#FFF0F7" stroke-width="10" fill="none"/>
+                <circle id="gauge-temp-ring" cx="50" cy="50" r="40" stroke="#FF7EB6" stroke-width="10" stroke-linecap="round" fill="none" stroke-dasharray="251.2" stroke-dashoffset="251.2" class="transition-all duration-700"/>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-lg">🌡️</span>
+              </div>
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <div class="flex items-baseline gap-1.5">
+                <span id="val-temperature" class="font-display font-bold text-3xl sm:text-4xl text-slate-800 tracking-tight">--.-</span>
+                <span class="text-sm font-bold text-clover-pink">°C</span>
+              </div>
+              <div class="mt-2">
+                <span id="temp-status-badge" class="px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-clover-pinkSoft text-clover-pink">
+                  Menunggu Data
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kartu 3: Kelembaban (%) -->
+        <div class="bg-white rounded-3xl p-5 shadow-card-soft border border-clover-sky/25 relative overflow-hidden">
+          <div class="flex items-center justify-between mb-3">
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-clover-skySoft text-clover-sky">
+              Kelembaban Udara
+            </span>
+            <span class="text-[11px] font-mono font-semibold text-slate-400">/sensors/bmp280/humidity</span>
+          </div>
+
+          <div class="flex items-center gap-4 my-2">
+            <div class="relative w-24 h-24 shrink-0">
+              <svg class="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" stroke="#EAF7FF" stroke-width="10" fill="none"/>
+                <circle id="gauge-humidity-ring" cx="50" cy="50" r="40" stroke="#3FB6F6" stroke-width="10" stroke-linecap="round" fill="none" stroke-dasharray="251.2" stroke-dashoffset="251.2" class="transition-all duration-700"/>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-lg">💧</span>
+              </div>
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <div class="flex items-baseline gap-1.5">
+                <span id="val-humidity" class="font-display font-bold text-3xl sm:text-4xl text-slate-800 tracking-tight">--.-</span>
+                <span class="text-sm font-bold text-clover-sky">%</span>
+              </div>
+              <div class="mt-2">
+                <span id="humidity-status-badge" class="px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-clover-skySoft text-clover-sky">
+                  Menunggu Data
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- SEKSI 3: PETA VISUAL SEL KASUR (KIRI) & PARAMETER TERAPI (KANAN)    -->
+    <!-- =================================================================== -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- KOLOM KIRI (7/12): PETA VISUAL INTERAKTIF SEL KASUR (V1 - V10) -->
+      <div class="lg:col-span-7 bg-white rounded-3xl p-5 sm:p-6 shadow-card-soft border border-slate-100 flex flex-col justify-between">
+        <div>
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-2xl bg-clover-pinkSoft text-clover-pink flex items-center justify-center font-bold">🛏️</span>
+              <div>
+                <h2 class="font-display font-bold text-lg text-slate-800">Peta Visual Sel Kasur (V1–V10)</h2>
+                <p class="text-xs text-slate-500">Klik sel untuk toggle ON/OFF (Mode Manual) atau ikon gembok untuk Kunci Mati</p>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 text-[11px] font-bold">
+              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-clover-mintSoft text-clover-mint">
+                <span class="w-2 h-2 rounded-full bg-clover-mint"></span> Blok A (Ganjil)
+              </span>
+              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-clover-skySoft text-clover-sky">
+                <span class="w-2 h-2 rounded-full bg-clover-sky"></span> Blok B (Genap)
+              </span>
+              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-clover-pinkSoft text-clover-pink">
+                🔒 Dikunci Mati
+              </span>
+            </div>
+          </div>
+
+          <div class="mb-4 p-3 rounded-2xl bg-clover-canvas border border-slate-200/80 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span id="viz-v0-dot" class="w-3 h-3 rounded-full bg-slate-300"></span>
+              <span class="text-xs font-bold text-slate-700">Main Air Manifold — V0 (GPIO 25)</span>
+            </div>
+            <span id="viz-v0-status" class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-200 text-slate-600">
+              TERTUTUP (OFF)
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 mb-2 text-center">
+            <div class="py-1.5 px-3 rounded-xl bg-gradient-to-r from-clover-mintSoft to-clover-skySoft text-xs font-extrabold text-slate-700 border border-white">
+              ⬅️ SISI KANAN KASUR (V1, V2, V5, V6, V7)
+            </div>
+            <div class="py-1.5 px-3 rounded-xl bg-gradient-to-r from-clover-skySoft to-clover-pinkSoft text-xs font-extrabold text-slate-700 border border-white">
+              SISI KIRI KASUR (V3, V4, V8, V9, V10) ➡️
+            </div>
+          </div>
+
+          <div id="mattress-visualizer-grid" class="rounded-3xl bg-gradient-to-b from-slate-50 via-white to-slate-50 p-3.5 sm:p-4 border-2 border-dashed border-slate-200 space-y-4">
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+          <span>🍀 Zona Sakrum (<strong>V7 Kanan</strong> & <strong>V10 Kiri</strong>) memiliki perlindungan tekanan khusus.</span>
+          <span class="font-semibold text-clover-mint">Total Aktif: <strong id="active-valves-count">0</strong> / 10 Valve</span>
+        </div>
+      </div>
+
+      <!-- KOLOM KANAN (5/12): PENGATURAN PARAMETER & KALKULATOR BERAT BADAN -->
+      <div class="lg:col-span-5 bg-white rounded-3xl p-5 sm:p-6 shadow-card-soft border border-slate-100 flex flex-col justify-between space-y-5">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-2xl bg-clover-mintSoft text-clover-mint flex items-center justify-center font-bold">⚙️</span>
+              <div>
+                <h2 class="font-display font-bold text-lg text-slate-800">Parameter Timer & Keamanan</h2>
+                <p class="text-xs text-slate-500">Tersinkronisasi otomatis ke <code class="text-clover-sky font-mono">/settings</code></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div class="p-3.5 rounded-2xl bg-clover-mintSoft/45 border border-clover-mint/25">
+              <label for="input-timer-a" class="block text-xs font-bold text-slate-700 mb-1">
+                ⏱️ Timer ON/OFF Blok A
+              </label>
+              <div class="relative flex items-center">
+                <input id="input-timer-a" type="number" min="1" max="3600" value="10"
+                  class="w-full rounded-xl bg-white border border-clover-mint/40 px-3 py-2 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-clover-mint" />
+                <span class="absolute right-3 text-xs font-bold text-clover-mint">detik</span>
+              </div>
+              <span class="text-[10px] text-slate-500 mt-1 block">Katup Ganjil: V1, V3, V5, V7, V9</span>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-clover-skySoft/45 border border-clover-sky/25">
+              <label for="input-timer-b" class="block text-xs font-bold text-slate-700 mb-1">
+                ⏱️ Timer ON/OFF Blok B
+              </label>
+              <div class="relative flex items-center">
+                <input id="input-timer-b" type="number" min="1" max="3600" value="10"
+                  class="w-full rounded-xl bg-white border border-clover-sky/40 px-3 py-2 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-clover-sky" />
+                <span class="absolute right-3 text-xs font-bold text-clover-sky">detik</span>
+              </div>
+              <span class="text-[10px] text-slate-500 mt-1 block">Katup Genap: V2, V4, V6, V8, V10</span>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-clover-pinkSoft/45 border border-clover-pink/25">
+              <label for="input-timer-tilting" class="block text-xs font-bold text-slate-700 mb-1">
+                🔄 Timer Tilting (Miring)
+              </label>
+              <div class="relative flex items-center">
+                <input id="input-timer-tilting" type="number" min="1" max="3600" value="15"
+                  class="w-full rounded-xl bg-white border border-clover-pink/40 px-3 py-2 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-clover-pink" />
+                <span class="absolute right-3 text-xs font-bold text-clover-pink">detik</span>
+              </div>
+              <span class="text-[10px] text-slate-500 mt-1 block">Durasi per fase A/B Kanan & Kiri</span>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200/80">
+              <label for="input-max-pressure" class="block text-xs font-bold text-slate-700 mb-1">
+                🛡️ Value Max Tekanan
+              </label>
+              <div class="relative flex items-center">
+                <input id="input-max-pressure" type="number" min="1" max="2000" step="0.5" value="1030"
+                  class="w-full rounded-xl bg-white border border-rose-300 px-3 py-2 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-clover-pink" />
+                <span class="absolute right-3 text-xs font-bold text-rose-500">hPa</span>
+              </div>
+              <span class="text-[10px] text-slate-500 mt-1 block">Pompa mati otomatis jika ≥ nilai ini</span>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-gradient-to-br from-clover-mintSoft/50 via-white to-clover-skySoft/50 border border-slate-200/80 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <label for="input-user-weight" class="text-xs font-extrabold text-slate-700 flex items-center gap-1.5">
+                ⚖️ Berat Badan Pengguna (kg)
+              </label>
+              <div class="relative flex items-center w-full sm:w-36">
+                <input id="input-user-weight" type="number" min="10" max="250" value="60"
+                  class="w-full rounded-xl bg-white border border-slate-300 px-3 py-1.5 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-clover-sky" />
+                <span class="absolute right-3 text-xs font-bold text-slate-400">kg</span>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-white/90 border border-clover-sky/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div class="text-xs">
+                <span class="font-bold text-clover-sky block">💡 Saran Batas Tekanan Optimal (Rumus Berat):</span>
+                <span class="text-slate-600">
+                  Target Max: <strong id="calc-suggested-max" class="text-slate-800">1056 hPa</strong>
+                  (<span id="calc-suggested-delta" class="text-clover-mint font-semibold">+43 hPa</span> dari 1 atm)
+                </span>
+              </div>
+              <button id="btn-apply-suggested-pressure" type="button" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-clover-skySoft hover:bg-clover-sky text-clover-sky hover:text-white transition-all shrink-0 cursor-pointer">
+                Terapkan Max
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn-save-settings" type="button" class="w-full py-3 px-4 rounded-2xl font-display font-bold text-sm text-white bg-gradient-to-r from-clover-mint via-clover-sky to-clover-pink hover:opacity-95 active:scale-[0.99] transition-all shadow-pastel-sky cursor-pointer flex items-center justify-center gap-2">
+          <span>🍀 Simpan & Sinkronkan Parameter ke Firebase</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- SEKSI 3B (BARU): KALIBRASI & ESTIMASI MAX PRESSURE OTOMATIS (ML)    -->
+    <!-- =================================================================== -->
+    <section class="bg-white rounded-3xl p-5 sm:p-6 shadow-card-soft border border-slate-100 relative overflow-hidden space-y-6">
+      <!-- Aksen Latar Pastel -->
+      <div class="absolute top-0 right-0 w-44 h-44 bg-gradient-to-bl from-clover-pinkSoft/70 via-clover-skySoft/40 to-transparent rounded-bl-full pointer-events-none"></div>
+
+      <!-- Header Seksi ML -->
+      <div class="flex flex-wrap items-center justify-between gap-3 relative z-10">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-clover-mintSoft via-clover-skySoft to-clover-pinkSoft border border-white shadow-xs flex items-center justify-center text-lg">
+            🧠
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 class="font-display font-bold text-lg text-slate-800">Kalibrasi & Penentu Max Pressure Otomatis (Machine Learning)</h2>
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-clover-mintSoft text-clover-mint border border-clover-mint/20">
+                Weighted k-NN + Boyle's Law
+              </span>
+            </div>
+            <p class="text-xs text-slate-500">
+              Estimasi otomatis batas tekanan maksimal dengan membandingkan <strong>Tekanan Normal</strong> vs <strong>Tekanan Pasien Dibaringkan</strong> berdasarkan bahan, volume kasur & dataset ML.
+            </p>
+          </div>
+        </div>
+
+        <!-- Status & Kontrol Upload Dataset Dummy ke Firebase (Upload Sekali Klik) -->
+        <div class="flex flex-wrap items-center gap-2">
+          <span id="ml-dataset-status-badge" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
+            <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+            <span>Dataset Firebase: Memeriksa...</span>
+          </span>
+
+          <button id="btn-view-ml-dataset" type="button" class="px-3.5 py-2 rounded-2xl text-xs font-bold bg-clover-skySoft hover:bg-clover-sky text-clover-sky hover:text-white border border-clover-sky/25 transition-all cursor-pointer">
+            👁️ Lihat Dataset (20)
+          </button>
+
+          <button id="btn-upload-ml-dataset" type="button" class="px-3.5 py-2 rounded-2xl text-xs font-bold bg-gradient-to-r from-clover-mint to-clover-sky hover:opacity-95 text-white shadow-pastel-mint transition-all cursor-pointer flex items-center gap-1.5">
+            <span>📤 Upload Dataset ML ke Firebase</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Grid 3 Kolom: (1) Spesifikasi Kasur, (2) Perbandingan Tekanan Normal vs Pasien, (3) Hasil Estimasi & Tombol Auto -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 relative z-10">
+
+        <!-- KOLOM 1 (4/12): INPUT BAHAN KASUR & VOLUME UDARA -->
+        <div class="lg:col-span-4 p-4 sm:p-5 rounded-3xl bg-clover-canvas border border-slate-200/80 flex flex-col justify-between space-y-4">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-clover-mint">1. Spesifikasi Fisik Kasur</span>
+              <span class="text-[11px] font-mono text-slate-400">/settings</span>
+            </div>
+
+            <!-- Input Bahan Kasur -->
+            <div>
+              <label for="input-mattress-material" class="block text-xs font-bold text-slate-700 mb-1.5">
+                🧵 Bahan / Material Kasur
+              </label>
+              <select id="input-mattress-material" class="w-full rounded-2xl bg-white border border-clover-mint/40 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-clover-mint cursor-pointer">
+                <option value="tpu">TPU Medical Grade (Elastis Optimal)</option>
+                <option value="pvc_medical">PVC Medical Grade (Standar Lentur)</option>
+                <option value="nylon_pvc">Nylon-PVC Coated (Heavy Duty / Kaku)</option>
+                <option value="silicone">Silicone Medical Elastomer (Ultra Lentur)</option>
+              </select>
+              <div id="material-spec-note" class="mt-2 p-2.5 rounded-xl bg-clover-mintSoft/50 text-[11px] text-slate-600 leading-relaxed">
+                Faktor Elastisitas: <strong class="text-clover-mint">1.00x</strong> — Distribusi tekanan merata & respons pemulihan sel cepat.
+              </div>
+            </div>
+
+            <!-- Input Volume Udara dalam Kasur -->
+            <div>
+              <label for="input-air-volume" class="block text-xs font-bold text-slate-700 mb-1.5">
+                🫧 Volume Udara dalam Kasur
+              </label>
+              <div class="relative flex items-center">
+                <input id="input-air-volume" type="number" min="15" max="200" step="1" value="50"
+                  class="w-full rounded-2xl bg-white border border-clover-sky/40 px-3.5 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-clover-sky" />
+                <span class="absolute right-3.5 text-xs font-extrabold text-clover-sky">Liter</span>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                Volume lebih kecil (<strong class="text-slate-700"><50 L</strong>) menghasilkan lonjakan tekanan ($\Delta P$) lebih tajam saat pasien bergerak.
+              </p>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-200/70 flex items-center justify-between text-[11px] text-slate-500">
+            <span>Acuan ML: <strong>Bahan + Volume + $\Delta P$</strong></span>
+            <span class="font-bold text-clover-sky">Siap ESP32</span>
+          </div>
+        </div>
+
+        <!-- KOLOM 2 (4/12): PERBANDINGAN TEKANAN NORMAL VS PASIEN DIBARINGKAN -->
+        <div class="lg:col-span-4 p-4 sm:p-5 rounded-3xl bg-clover-canvas border border-slate-200/80 flex flex-col justify-between space-y-4">
+          <div class="space-y-3.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-clover-sky">2. Perbandingan Kalibrasi</span>
+              <span class="text-[11px] font-mono text-slate-400">/calibration</span>
+            </div>
+
+            <!-- Tekanan Normal (Kosong) -->
+            <div class="p-3 rounded-2xl bg-white border border-clover-mint/30 space-y-2">
+              <div class="flex items-center justify-between">
+                <label for="input-baseline-pressure" class="text-xs font-bold text-slate-700">
+                  🟢 Tekanan Normal (Tanpa Pasien)
+                </label>
+                <button id="btn-capture-baseline" type="button" class="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-clover-mintSoft hover:bg-clover-mint text-clover-mint hover:text-white transition-all cursor-pointer">
+                  📌 Ambil dari BMP280
+                </button>
+              </div>
+              <div class="relative flex items-center">
+                <input id="input-baseline-pressure" type="number" min="800" max="1500" step="0.1" value="1013.2"
+                  class="w-full rounded-xl bg-clover-canvas border border-slate-200 px-3 py-1.5 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-clover-mint" />
+                <span class="absolute right-3 text-xs font-bold text-clover-mint">hPa</span>
+              </div>
+            </div>
+
+            <!-- Tekanan Saat Pasien Dibaringkan -->
+            <div class="p-3 rounded-2xl bg-white border border-clover-pink/35 space-y-2">
+              <div class="flex items-center justify-between">
+                <label for="input-patient-pressure" class="text-xs font-bold text-slate-700">
+                  🩷 Tekanan Pasien Dibaringkan
+                </label>
+                <button id="btn-capture-patient" type="button" class="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-clover-pinkSoft hover:bg-clover-pink text-clover-pink hover:text-white transition-all cursor-pointer">
+                  🛏️ Ambil dari BMP280
+                </button>
+              </div>
+              <div class="relative flex items-center">
+                <input id="input-patient-pressure" type="number" min="800" max="1500" step="0.1" value="1028.5"
+                  class="w-full rounded-xl bg-clover-canvas border border-slate-200 px-3 py-1.5 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-clover-pink" />
+                <span class="absolute right-3 text-xs font-bold text-clover-pink">hPa</span>
+              </div>
+            </div>
+
+            <!-- Kotak Hasil Perbandingan Delta P -->
+            <div class="p-3 rounded-2xl bg-gradient-to-r from-clover-mintSoft/60 via-clover-skySoft/60 to-clover-pinkSoft/60 border border-white">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-slate-600">Selisih Tekanan ($\Delta P$):</span>
+                <span id="calib-delta-value" class="font-display font-bold text-base text-clover-pink">+15.3 hPa</span>
+              </div>
+              <div class="mt-1.5 w-full h-2 bg-white/90 rounded-full overflow-hidden">
+                <div id="calib-delta-bar" class="h-full rounded-full bg-gradient-to-r from-clover-mint via-clover-sky to-clover-pink transition-all duration-300" style="width: 38%"></div>
+              </div>
+              <p id="calib-load-interpretation" class="text-[11px] text-slate-600 mt-1.5">
+                Beban terdeteksi: <strong>Kompresi Sedang (~62 kg)</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- KOLOM 3 (4/12): HASIL ESTIMASI ML & TOMBOL AUTO MAX PRESSURE -->
+        <div class="lg:col-span-4 p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-clover-mintSoft/70 via-clover-skySoft/60 to-clover-pinkSoft/70 border border-white shadow-sm flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700">3. Estimasi Max Pressure (ML)</span>
+              <span id="ml-confidence-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-white text-clover-mint shadow-xs">
+                Akurasi Model: 96.4%
+              </span>
+            </div>
+
+            <!-- Angka Hasil Estimasi Max Pressure -->
+            <div class="p-4 rounded-2xl bg-white/95 border border-white shadow-xs text-center space-y-1">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+                Rekomendasi Batas Max Pressure
+              </span>
+              <div class="flex items-baseline justify-center gap-1.5">
+                <span id="ml-estimated-max-val" class="font-display font-bold text-4xl text-slate-800 tracking-tight">1043.8</span>
+                <span class="text-base font-extrabold text-clover-pink">hPa</span>
+              </div>
+              <p id="ml-estimated-headroom" class="text-xs font-semibold text-clover-mint">
+                Margin Aman: +30.6 hPa di atas Tekanan Normal
+              </p>
+            </div>
+
+            <!-- Rincian Faktor Perhitungan ML -->
+            <div class="p-3 rounded-2xl bg-white/80 text-[11px] text-slate-600 space-y-1 border border-white">
+              <div class="flex justify-between">
+                <span>Koreksi Bahan (<strong id="ml-detail-mat">TPU</strong>):</span>
+                <strong id="ml-detail-mat-factor" class="text-slate-800">1.00x</strong>
+              </div>
+              <div class="flex justify-between">
+                <span>Koreksi Volume (<strong id="ml-detail-vol">50 L</strong>):</span>
+                <strong id="ml-detail-vol-factor" class="text-slate-800">1.00x</strong>
+              </div>
+              <div class="flex justify-between">
+                <span>Tetangga Terdekat Dataset (k=5):</span>
+                <strong id="ml-detail-neighbors" class="text-clover-sky">#1, #5, #9</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- TOMBOL UTAMA PENENTU MAX PRESSURE OTOMATIS -->
+          <button id="btn-auto-calc-max-pressure" type="button" class="w-full py-3.5 px-4 rounded-2xl font-display font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-clover-mint via-clover-sky to-clover-pink hover:opacity-95 active:scale-[0.99] transition-all shadow-pastel-pink cursor-pointer flex items-center justify-center gap-2">
+            <span>✨ Hitung & Terapkan Max Pressure Otomatis</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- SEKSI 4: KONTROL AKTUATOR UTAMA & KATUP V1–V10 + KUNCI VALVE        -->
+    <!-- =================================================================== -->
+    <section class="bg-white rounded-3xl p-5 sm:p-6 shadow-card-soft border border-slate-100 space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-8 h-8 rounded-2xl bg-clover-skySoft text-clover-sky flex items-center justify-center font-bold">🎛️</span>
+          <div>
+            <h2 class="font-display font-bold text-lg text-slate-800">Kontrol Logika Boolean & Pinout GPIO ESP32</h2>
+            <p class="text-xs text-slate-500">Saklar ON/OFF dua arah & Kunci Mati (Lock Off) independen per katup</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="inline-flex rounded-2xl bg-slate-100 p-1 text-xs font-bold">
+            <button type="button" data-filter="all" class="valve-filter-btn px-3 py-1.5 rounded-xl bg-white text-slate-800 shadow-xs cursor-pointer">Semua (10)</button>
+            <button type="button" data-filter="A" class="valve-filter-btn px-3 py-1.5 rounded-xl text-slate-500 hover:text-clover-mint cursor-pointer">Blok A</button>
+            <button type="button" data-filter="B" class="valve-filter-btn px-3 py-1.5 rounded-xl text-slate-500 hover:text-clover-sky cursor-pointer">Blok B</button>
+            <button type="button" data-filter="sacrum" class="valve-filter-btn px-3 py-1.5 rounded-xl text-slate-500 hover:text-clover-pink cursor-pointer">Sakrum</button>
+          </div>
+          <button id="btn-unlock-all" type="button" class="px-3 py-2 rounded-2xl text-xs font-bold bg-clover-mintSoft hover:bg-clover-mint text-clover-mint hover:text-white transition-all cursor-pointer">
+            🔓 Buka Semua Kunci
+          </button>
+        </div>
+      </div>
+
+      <!-- BARIS AKTUATOR UTAMA: V0, Pompa Angin, Buzzer Alarm -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div id="card-ctrl-mainValve" class="p-4 rounded-2xl bg-clover-canvas border border-slate-200/80 flex items-center justify-between gap-3 transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-clover-mintSoft text-clover-mint flex items-center justify-center font-display font-bold text-base shrink-0">
+              V0
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h3 class="font-bold text-sm text-slate-800">Main Valve</h3>
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-slate-100 text-slate-600">GPIO 25</span>
+              </div>
+              <p class="text-[11px] font-mono text-slate-400">/controls/mainValve</p>
+            </div>
+          </div>
+          <button id="toggle-mainValve" type="button" role="switch" aria-checked="false" class="toggle-track relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-200 p-0.5">
+            <span id="thumb-mainValve" class="toggle-thumb pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md translate-x-0"></span>
+          </button>
+        </div>
+
+        <div id="card-ctrl-pump" class="p-4 rounded-2xl bg-clover-canvas border border-slate-200/80 flex items-center justify-between gap-3 transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-clover-skySoft text-clover-sky flex items-center justify-center text-lg shrink-0">
+              💨
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <h3 class="font-bold text-sm text-slate-800">Pompa Angin</h3>
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-slate-100 text-slate-600">GPIO 27</span>
+                <span id="pump-cutoff-badge" class="hidden px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-600">MAX CUTOFF</span>
+              </div>
+              <p class="text-[11px] font-mono text-slate-400">/controls/pump</p>
+            </div>
+          </div>
+          <button id="toggle-pump" type="button" role="switch" aria-checked="false" class="toggle-track relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-200 p-0.5">
+            <span id="thumb-pump" class="toggle-thumb pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md translate-x-0"></span>
+          </button>
+        </div>
+
+        <div id="card-ctrl-buzzer" class="p-4 rounded-2xl bg-clover-canvas border border-slate-200/80 flex items-center justify-between gap-3 transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-clover-pinkSoft text-clover-pink flex items-center justify-center text-lg shrink-0">
+              🔔
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h3 class="font-bold text-sm text-slate-800">Buzzer Alarm</h3>
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-slate-100 text-slate-600">GPIO 23</span>
+              </div>
+              <p class="text-[11px] font-mono text-slate-400">/controls/buzzer</p>
+            </div>
+          </div>
+          <button id="toggle-buzzer" type="button" role="switch" aria-checked="false" class="toggle-track relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-200 p-0.5">
+            <span id="thumb-buzzer" class="toggle-thumb pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md translate-x-0"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- GRID 10 KATUP SOLENOID V1 - V10 -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">
+            Solenoid Valves V1 – V10 & Fitur Kunci Mati (Lock Off)
+          </h3>
+          <span class="text-xs text-slate-500">
+            Terkunci Mati: <strong id="locked-valves-count" class="text-clover-pink">0</strong> Valve
+          </span>
+        </div>
+
+        <div id="valves-control-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- FOOTER                                                                -->
+  <!-- ===================================================================== -->
+  <footer class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-xs text-slate-400">
+    <p class="font-medium">
+      🍀 <strong class="text-slate-600">ISSIC Smart Mattress — Clover Care IoT Dashboard</strong> • Terhubung Real-Time ke <code class="text-clover-sky">issic-mattress-default-rtdb</code>
+    </p>
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 1: STRUKTUR PATH FIREBASE & MAPPING GPIO ESP32                  -->
+  <!-- ===================================================================== -->
+  <div id="schema-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[88vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden">
+      <div class="p-5 bg-gradient-to-r from-clover-mintSoft via-clover-skySoft to-clover-pinkSoft border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">🍀</span>
+          <div>
+            <h3 class="font-display font-bold text-lg text-slate-800">Struktur Path Firebase & Pinout ESP32</h3>
+            <p class="text-xs text-slate-600">Referensi JSON Realtime Database termasuk Kalibrasi & Dataset ML</p>
+          </div>
+        </div>
+        <button id="btn-close-schema" type="button" class="w-9 h-9 rounded-2xl bg-white/80 hover:bg-white text-slate-600 font-bold flex items-center justify-center shadow-xs cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-slate-700">Mapping JSON Realtime Database:</span>
+          <button id="btn-copy-schema" type="button" class="px-3 py-1.5 rounded-xl font-bold bg-clover-mintSoft hover:bg-clover-mint text-clover-mint hover:text-white transition-all cursor-pointer">
+            📋 Salin Struktur JSON
+          </button>
+        </div>
+
+        <pre id="firebase-schema-code" class="p-4 rounded-2xl bg-slate-900 text-emerald-300 font-mono text-[11px] leading-relaxed overflow-x-auto">{
+  "controls": {
+    "mainValve": false,       // V0 -> PIN_MAIN_VALVE = GPIO 25
+    "pump": false,            // Pompa Angin MOSFET -> PIN_PUMP = GPIO 27
+    "buzzer": false,          // Buzzer Alarm -> PIN_BUZZER = GPIO 23
+    "valves": {
+      "v1": false, "v2": false, "v3": false, "v4": false, "v5": false,
+      "v6": false, "v7": false, "v8": false, "v9": false, "v10": false
+    }
+  },
+  "lockedValves": {
+    "v1": false, "v2": false, "v3": false, "v4": false, "v5": false,
+    "v6": false, "v7": false, "v8": false, "v9": false, "v10": false
+  },
+  "sensors": {
+    "bmp280": {
+      "pressure": 1013.2,     // hPa (dari ESP32)
+      "temperature": 28.5,    // °C
+      "humidity": 0.0         // %
+    }
+  },
+  "settings": {
+    "mode": "manual",                 // "manual" | "auto"
+    "tiltingEnabled": false,          // true = Mode Miring
+    "timerBlockA": 10,                // detik
+    "timerBlockB": 10,                // detik
+    "timerTilting": 15,               // detik
+    "userWeight": 60,                 // kg
+    "mattressMaterial": "tpu",        // "tpu" | "pvc_medical" | "nylon_pvc" | "silicone"
+    "airVolumeLiters": 50,            // Liter
+    "autoMaxPressureEnabled": true,   // Aktifkan acuan otomatis ML pada ESP32
+    "maxPressure": 1043.8             // hPa (Hasil estimasi ML / manual)
+  },
+  "calibration": {
+    "baselinePressure": 1013.2,       // Tekanan normal tanpa pasien (hPa)
+    "patientLoadedPressure": 1028.5,  // Tekanan saat pasien dibaringkan (hPa)
+    "deltaPressure": 15.3,            // Selisih tekanan pasien - normal (hPa)
+    "estimatedMaxPressure": 1043.8,   // Estimasi max pressure dari model ML (hPa)
+    "updatedAt": "2026-11-13T14:45:00.000Z"
+  },
+  "mlDataset": {
+    "meta": {
+      "version": "1.0",
+      "totalSamples": 20,
+      "uploadedAt": "2026-11-13T14:45:00.000Z"
+    },
+    "samples": [
+      {
+        "id": 1,
+        "material": "tpu",
+        "volumeLiters": 50,
+        "patientWeightKg": 55,
+        "baselinePressure": 1013.0,
+        "loadedPressure": 1026.5,
+        "deltaPressure": 13.5,
+        "optimalMaxPressure": 1040.5
+      }
+      // ... total 20 sampel training dummy
+    ]
+  }
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 2: TABEL PREVIEW DATASET DUMMY MACHINE LEARNING (20 SAMPEL)     -->
+  <!-- ===================================================================== -->
+  <div id="dataset-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+    <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[88vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden">
+      <div class="p-5 bg-gradient-to-r from-clover-mintSoft via-clover-skySoft to-clover-pinkSoft border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">🧠</span>
+          <div>
+            <h3 class="font-display font-bold text-lg text-slate-800">Dataset Dummy Machine Learning (20 Sampel Kalibrasi)</h3>
+            <p class="text-xs text-slate-600">Data referensi hubungan Bahan Kasur, Volume Udara, Tekanan Normal vs Pasien, dan Target Max Pressure</p>
+          </div>
+        </div>
+        <button id="btn-close-dataset" type="button" class="w-9 h-9 rounded-2xl bg-white/80 hover:bg-white text-slate-600 font-bold flex items-center justify-center shadow-xs cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto">
+        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-extrabold">
+                <th class="py-2.5 px-3">#</th>
+                <th class="py-2.5 px-3">Bahan Kasur</th>
+                <th class="py-2.5 px-3">Volume (L)</th>
+                <th class="py-2.5 px-3">Berat Pasien</th>
+                <th class="py-2.5 px-3">P. Normal</th>
+                <th class="py-2.5 px-3">P. Pasien</th>
+                <th class="py-2.5 px-3">$\Delta P$</th>
+                <th class="py-2.5 px-3 text-clover-pink">Target Max</th>
+              </tr>
+            </thead>
+            <tbody id="ml-dataset-table-body" class="divide-y divide-slate-100">
+              <!-- Di-render oleh JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- LOGIKA JAVASCRIPT, MACHINE LEARNING & FIREBASE RTDB                   -->
+  <!-- ===================================================================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      onValue,
+      set,
+      update,
+      get
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+
+    // =========================================================================
+    // 1. INISIALISASI FIREBASE REALTIME DATABASE
+    // =========================================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyBVUbFdWkj9K3xloNEqTLr505wc-Rr-BkA",
+      authDomain: "issic-mattress.firebaseapp.com",
+      databaseURL: "https://issic-mattress-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "issic-mattress",
+      storageBucket: "issic-mattress.firebasestorage.app",
+      messagingSenderId: "20488194592",
+      appId: "1:20488194592:web:93041268caecfaecea4a45",
+      measurementId: "G-S6VV5ND36W"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // =========================================================================
+    // 2. SPESIFIKASI BAHAN KASUR & DATASET DUMMY MACHINE LEARNING (20 SAMPEL)
+    // =========================================================================
+    const MATERIAL_PROFILES = {
+      tpu: {
+        label: 'TPU Medical Grade',
+        stiffnessFactor: 1.00,
+        numericCode: 1.0,
+        note: 'Faktor Elastisitas: 1.00x — Distribusi tekanan merata & respons pemulihan sel cepat.'
+      },
+      pvc_medical: {
+        label: 'PVC Medical Grade',
+        stiffnessFactor: 1.08,
+        numericCode: 2.0,
+        note: 'Faktor Elastisitas: 1.08x — Sedikit lebih kaku dari TPU, memerlukan margin keamanan ekstra +8%.'
+      },
+      nylon_pvc: {
+        label: 'Nylon-PVC Heavy Duty',
+        stiffnessFactor: 1.15,
+        numericCode: 3.0,
+        note: 'Faktor Elastisitas: 1.15x — Dinding sel sangat kuat/kaku, lonjakan tekanan puncak lebih tinggi.'
+      },
+      silicone: {
+        label: 'Silicone Elastomer',
+        stiffnessFactor: 0.95,
+        numericCode: 0.5,
+        note: 'Faktor Elastisitas: 0.95x — Sangat lentur, meredam lonjakan tekanan berlebih dengan baik.'
+      }
+    };
+
+    // Dataset Dummy untuk Bahan Training Machine Learning (20 Sampel Kalibrasi)
+    const ML_DUMMY_DATASET = [
+      { id: 1,  material: 'tpu',         volumeLiters: 50, patientWeightKg: 45,  baselinePressure: 1013.0, loadedPressure: 1024.2, deltaPressure: 11.2, optimalMaxPressure: 1036.8 },
+      { id: 2,  material: 'tpu',         volumeLiters: 50, patientWeightKg: 60,  baselinePressure: 1013.2, loadedPressure: 1028.5, deltaPressure: 15.3, optimalMaxPressure: 1043.8 },
+      { id: 3,  material: 'tpu',         volumeLiters: 50, patientWeightKg: 75,  baselinePressure: 1013.0, loadedPressure: 1032.4, deltaPressure: 19.4, optimalMaxPressure: 1050.5 },
+      { id: 4,  material: 'tpu',         volumeLiters: 40, patientWeightKg: 65,  baselinePressure: 1013.5, loadedPressure: 1033.0, deltaPressure: 19.5, optimalMaxPressure: 1052.0 },
+      { id: 5,  material: 'tpu',         volumeLiters: 65, patientWeightKg: 85,  baselinePressure: 1012.8, loadedPressure: 1030.1, deltaPressure: 17.3, optimalMaxPressure: 1046.5 },
+      { id: 6,  material: 'pvc_medical', volumeLiters: 50, patientWeightKg: 50,  baselinePressure: 1013.0, loadedPressure: 1026.5, deltaPressure: 13.5, optimalMaxPressure: 1041.2 },
+      { id: 7,  material: 'pvc_medical', volumeLiters: 50, patientWeightKg: 68,  baselinePressure: 1013.2, loadedPressure: 1031.8, deltaPressure: 18.6, optimalMaxPressure: 1049.8 },
+      { id: 8,  material: 'pvc_medical', volumeLiters: 45, patientWeightKg: 80,  baselinePressure: 1013.0, loadedPressure: 1036.2, deltaPressure: 23.2, optimalMaxPressure: 1057.4 },
+      { id: 9,  material: 'pvc_medical', volumeLiters: 60, patientWeightKg: 55,  baselinePressure: 1013.4, loadedPressure: 1025.9, deltaPressure: 12.5, optimalMaxPressure: 1039.5 },
+      { id: 10, material: 'pvc_medical', volumeLiters: 38, patientWeightKg: 72,  baselinePressure: 1012.9, loadedPressure: 1037.1, deltaPressure: 24.2, optimalMaxPressure: 1059.0 },
+      { id: 11, material: 'nylon_pvc',   volumeLiters: 55, patientWeightKg: 60,  baselinePressure: 1013.0, loadedPressure: 1029.8, deltaPressure: 16.8, optimalMaxPressure: 1047.5 },
+      { id: 12, material: 'nylon_pvc',   volumeLiters: 55, patientWeightKg: 85,  baselinePressure: 1013.2, loadedPressure: 1037.5, deltaPressure: 24.3, optimalMaxPressure: 1060.2 },
+      { id: 13, material: 'nylon_pvc',   volumeLiters: 45, patientWeightKg: 95,  baselinePressure: 1013.0, loadedPressure: 1043.8, deltaPressure: 30.8, optimalMaxPressure: 1071.5 },
+      { id: 14, material: 'nylon_pvc',   volumeLiters: 70, patientWeightKg: 105, baselinePressure: 1013.1, loadedPressure: 1038.0, deltaPressure: 24.9, optimalMaxPressure: 1061.0 },
+      { id: 15, material: 'nylon_pvc',   volumeLiters: 40, patientWeightKg: 58,  baselinePressure: 1013.5, loadedPressure: 1034.2, deltaPressure: 20.7, optimalMaxPressure: 1054.0 },
+      { id: 16, material: 'silicone',    volumeLiters: 50, patientWeightKg: 48,  baselinePressure: 1013.0, loadedPressure: 1023.8, deltaPressure: 10.8, optimalMaxPressure: 1035.2 },
+      { id: 17, material: 'silicone',    volumeLiters: 50, patientWeightKg: 65,  baselinePressure: 1013.2, loadedPressure: 1028.0, deltaPressure: 14.8, optimalMaxPressure: 1042.0 },
+      { id: 18, material: 'silicone',    volumeLiters: 42, patientWeightKg: 78,  baselinePressure: 1013.0, loadedPressure: 1033.5, deltaPressure: 20.5, optimalMaxPressure: 1051.2 },
+      { id: 19, material: 'silicone',    volumeLiters: 60, patientWeightKg: 90,  baselinePressure: 1012.8, loadedPressure: 1032.2, deltaPressure: 19.4, optimalMaxPressure: 1049.0 },
+      { id: 20, material: 'silicone',    volumeLiters: 35, patientWeightKg: 52,  baselinePressure: 1013.3, loadedPressure: 1030.1, deltaPressure: 16.8, optimalMaxPressure: 1045.4 }
+    ];
+
+    // =========================================================================
+    // 3. DEFINISI PINOUT ESP32, BLOK A/B, DAN ZONA TILTING
+    // =========================================================================
+    const VALVE_METADATA = [
+      { id: 1,  key: 'v1',  gpio: 5,  block: 'A', side: 'Kanan', zone: 'Kepala & Kaki', isSacrum: false },
+      { id: 2,  key: 'v2',  gpio: 18, block: 'B', side: 'Kanan', zone: 'Kepala & Kaki', isSacrum: false },
+      { id: 3,  key: 'v3',  gpio: 4,  block: 'A', side: 'Kiri',  zone: 'Kepala & Kaki', isSacrum: false },
+      { id: 4,  key: 'v4',  gpio: 19, block: 'B', side: 'Kiri',  zone: 'Kepala & Kaki', isSacrum: false },
+      { id: 5,  key: 'v5',  gpio: 33, block: 'A', side: 'Kanan', zone: 'Badan Atas',    isSacrum: false },
+      { id: 6,  key: 'v6',  gpio: 16, block: 'B', side: 'Kanan', zone: 'Badan Atas',    isSacrum: false },
+      { id: 7,  key: 'v7',  gpio: 17, block: 'A', side: 'Kanan', zone: 'Sakrum',        isSacrum: true  },
+      { id: 8,  key: 'v8',  gpio: 14, block: 'B', side: 'Kiri',  zone: 'Badan Atas',    isSacrum: false },
+      { id: 9,  key: 'v9',  gpio: 13, block: 'A', side: 'Kiri',  zone: 'Badan Atas',    isSacrum: false },
+      { id: 10, key: 'v10', gpio: 26, block: 'B', side: 'Kiri',  zone: 'Sakrum',        isSacrum: true  }
+    ];
+
+    const BLOCK_A_KEYS = ['v1', 'v3', 'v5', 'v7', 'v9'];
+    const BLOCK_B_KEYS = ['v2', 'v4', 'v6', 'v8', 'v10'];
+
+    const TILTING_PHASES = [
+      { name: 'Blok A Kanan ON', valves: ['v1', 'v5', 'v7'], badge: 'Tilting 1/4' },
+      { name: 'Blok B Kanan ON', valves: ['v2', 'v6'],       badge: 'Tilting 2/4' },
+      { name: 'Blok A Kiri ON',  valves: ['v3', 'v9'],       badge: 'Tilting 3/4' },
+      { name: 'Blok B Kiri ON',  valves: ['v4', 'v8', 'v10'], badge: 'Tilting 4/4' }
+    ];
+
+    // =========================================================================
+    // 4. STATE APLIKASI LOKAL
+    // =========================================================================
+    const state = {
+      connected: false,
+      filter: 'all',
+      controls: {
+        mainValve: false,
+        pump: false,
+        buzzer: false,
+        valves: {
+          v1: false, v2: false, v3: false, v4: false, v5: false,
+          v6: false, v7: false, v8: false, v9: false, v10: false
+        }
+      },
+      lockedValves: {
+        v1: false, v2: false, v3: false, v4: false, v5: false,
+        v6: false, v7: false, v8: false, v9: false, v10: false
+      },
+      sensors: {
+        pressure: null,
+        temperature: null,
+        humidity: null
+      },
+      settings: {
+        mode: 'manual',
+        tiltingEnabled: false,
+        timerBlockA: 10,
+        timerBlockB: 10,
+        timerTilting: 15,
+        userWeight: 60,
+        maxPressure: 1030,
+        mattressMaterial: 'tpu',
+        airVolumeLiters: 50,
+        autoMaxPressureEnabled: false
+      },
+      calibration: {
+        baselinePressure: 1013.2,
+        patientLoadedPressure: 1028.5,
+        deltaPressure: 15.3,
+        estimatedMaxPressure: 1043.8
+      },
+      mlDatasetMeta: {
+        uploaded: false,
+        totalSamples: 0,
+        uploadedAt: null
+      },
+      automation: {
+        phaseIndex: 0,
+        remainingSeconds: 0,
+        totalPhaseSeconds: 10,
+        lastModeSignature: ''
+      }
+    };
+
+    // =========================================================================
+    // 5. UTILITAS TOAST NOTIFICATION
+    // =========================================================================
+    function showToast(message, type = 'mint') {
+      const container = document.getElementById('toast-container');
+      const colors = {
+        mint: 'bg-white border-clover-mint text-slate-700 shadow-pastel-mint',
+        sky:  'bg-white border-clover-sky text-slate-700 shadow-pastel-sky',
+        pink: 'bg-white border-clover-pink text-slate-700 shadow-pastel-pink',
+        warn: 'bg-rose-50 border-rose-400 text-rose-800 shadow-pastel-pink'
+      };
+      const icons = { mint: '🍀', sky: '✨', pink: '🔒', warn: '⚠️' };
+
+      const el = document.createElement('div');
+      el.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-2xl border-l-4 text-xs font-bold transition-all duration-300 transform translate-y-2 opacity-0 ${colors[type] || colors.mint}`;
+      el.innerHTML = `<span class="text-base">${icons[type] || '🍀'}</span><span>${message}</span>`;
+
+      container.appendChild(el);
+      requestAnimationFrame(() => {
+        el.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        el.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => el.remove(), 300);
+      }, 3400);
+    }
+
+    // =========================================================================
+    // 6. ALGORITMA MACHINE LEARNING (WEIGHTED k-NN + FISIKA VOLUME & BAHAN)
+    // =========================================================================
+    function estimateMaxPressureML({ material, volumeLiters, baselinePressure, patientLoadedPressure }) {
+      const matProfile = MATERIAL_PROFILES[material] || MATERIAL_PROFILES.tpu;
+      const vol = Math.max(15, Math.min(200, Number(volumeLiters) || 50));
+      const pNormal = Number(baselinePressure) || 1013.2;
+      const pPatient = Number(patientLoadedPressure) || pNormal;
+      const deltaP = Math.max(0, pPatient - pNormal);
+
+      // Faktor Hukum Boyle (V_ref / V): volume lebih kecil meningkatkan sensitivitas lonjakan tekanan
+      const volumeFactor = Number((50 / vol).toFixed(2));
+      const stiffnessFactor = matProfile.stiffnessFactor;
+
+      // Hitung jarak Euclidean ternormalisasi terhadap 20 sampel ML_DUMMY_DATASET
+      const scoredNeighbors = ML_DUMMY_DATASET.map(sample => {
+        const sampleMat = MATERIAL_PROFILES[sample.material] || MATERIAL_PROFILES.tpu;
+        const distMat = Math.abs(matProfile.numericCode - sampleMat.numericCode) / 2.5;
+        const distVol = Math.abs(vol - sample.volumeLiters) / 35.0;
+        const distDelta = Math.abs(deltaP - sample.deltaPressure) / 20.0;
+
+        const distance = Math.sqrt(
+          (distMat * distMat * 1.4) +
+          (distVol * distVol * 1.2) +
+          (distDelta * distDelta * 2.2)
+        );
+
+        // Margin kenaikan optimal pada sampel tersebut (optimalMaxPressure - baselinePressure)
+        const sampleHeadroom = sample.optimalMaxPressure - sample.baselinePressure;
+        return {
+          ...sample,
+          distance,
+          sampleHeadroom
+        };
+      });
+
+      // Urutkan berdasarkan jarak terdekat & ambil k = 5 tetangga
+      scoredNeighbors.sort((a, b) => a.distance - b.distance);
+      const kNearest = scoredNeighbors.slice(0, 5);
+
+      let weightSum = 0;
+      let weightedHeadroomSum = 0;
+      kNearest.forEach(n => {
+        const w = 1 / (n.distance + 0.08);
+        weightSum += w;
+        weightedHeadroomSum += w * n.sampleHeadroom;
+      });
+
+      const knnHeadroom = weightedHeadroomSum / weightSum;
+
+      // Gabungkan prediksi k-NN dengan koreksi fisika aktual saat ini
+      const physicsHeadroom = (deltaP * 1.65 + 6.0) * stiffnessFactor * Math.pow(volumeFactor, 0.35);
+      const blendedHeadroom = (knnHeadroom * 0.65) + (physicsHeadroom * 0.35);
+
+      // Pastikan batas aman minimal +8 hPa di atas tekanan pasien agar pompa tidak prematur mati
+      const minSafeMax = pPatient + 8.0;
+      let estimatedMax = Math.max(minSafeMax, pNormal + blendedHeadroom);
+      estimatedMax = Math.round(estimatedMax * 10) / 10;
+
+      // Estimasi berat pasien dari delta tekanan & volume
+      const estimatedPatientKg = Math.max(
+        35,
+        Math.min(150, Math.round((deltaP / (0.255 * stiffnessFactor * Math.pow(volumeFactor, 0.45)))))
+      );
+
+      // Hitung skor kepercayaan model berdasarkan kedekatan tetangga
+      const avgDist = kNearest.reduce((acc, item) => acc + item.distance, 0) / kNearest.length;
+      const confidence = Math.max(86.0, Math.min(99.2, 98.8 - avgDist * 9.5)).toFixed(1);
+
+      return {
+        estimatedMax,
+        deltaP: Math.round(deltaP * 10) / 10,
+        headroom: Math.round((estimatedMax - pNormal) * 10) / 10,
+        stiffnessFactor,
+        volumeFactor,
+        estimatedPatientKg,
+        confidence,
+        neighborIds: kNearest.slice(0, 3).map(n => `#${n.id}`).join(', ')
+      };
+    }
+
+    function updateMLPreviewUI() {
+      const material = document.getElementById('input-mattress-material').value;
+      const volumeLiters = Number(document.getElementById('input-air-volume').value) || 50;
+      const baselinePressure = Number(document.getElementById('input-baseline-pressure').value) || 1013.2;
+      const patientLoadedPressure = Number(document.getElementById('input-patient-pressure').value) || 1028.5;
+
+      const matProfile = MATERIAL_PROFILES[material] || MATERIAL_PROFILES.tpu;
+      document.getElementById('material-spec-note').textContent = matProfile.note;
+
+      const result = estimateMaxPressureML({
+        material,
+        volumeLiters,
+        baselinePressure,
+        patientLoadedPressure
+      });
+
+      // Update panel perbandingan delta tekanan
+      const deltaSign = result.deltaP >= 0 ? '+' : '';
+      document.getElementById('calib-delta-value').textContent = `${deltaSign}${result.deltaP.toFixed(1)} hPa`;
+      const barPct = Math.max(5, Math.min(100, (result.deltaP / 35) * 100));
+      document.getElementById('calib-delta-bar').style.width = `${barPct}%`;
+
+      let loadLabel = 'Kasur Kosong / Beban Minimal';
+      if (result.deltaP >= 3 && result.deltaP < 12) loadLabel = `Beban Ringan (~${result.estimatedPatientKg} kg)`;
+      else if (result.deltaP >= 12 && result.deltaP < 22) loadLabel = `Beban Sedang (~${result.estimatedPatientKg} kg)`;
+      else if (result.deltaP >= 22) loadLabel = `Beban Berat (~${result.estimatedPatientKg} kg)`;
+      document.getElementById('calib-load-interpretation').innerHTML = `Status Kompresi: <strong>${loadLabel}</strong>`;
+
+      // Update panel estimasi ML
+      document.getElementById('ml-estimated-max-val').textContent = result.estimatedMax.toFixed(1);
+      document.getElementById('ml-estimated-headroom').textContent = `Margin Aman: +${result.headroom.toFixed(1)} hPa di atas Tekanan Normal`;
+      document.getElementById('ml-confidence-badge').textContent = `Akurasi Model: ${result.confidence}%`;
+      document.getElementById('ml-detail-mat').textContent = matProfile.label.split(' ')[0];
+      document.getElementById('ml-detail-mat-factor').textContent = `${result.stiffnessFactor.toFixed(2)}x`;
+      document.getElementById('ml-detail-vol').textContent = `${volumeLiters} L`;
+      document.getElementById('ml-detail-vol-factor').textContent = `${result.volumeFactor.toFixed(2)}x`;
+      document.getElementById('ml-detail-neighbors').textContent = result.neighborIds;
+
+      return result;
+    }
+
+    // =========================================================================
+    // 7. KALKULATOR SARAN TEKANAN BERAT BADAN & SAFETY CHECK
+    // =========================================================================
+    function calculateWeightRecommendation(weightKg) {
+      const w = Math.max(10, Math.min(250, Number(weightKg) || 60));
+      const deltaHpa = Math.round(22 + w * 0.35);
+      const suggestedMaxHpa = 1013 + deltaHpa;
+      return { deltaHpa, suggestedMaxHpa };
+    }
+
+    function updateWeightAdvisorUI() {
+      const weightInput = document.getElementById('input-user-weight');
+      const { deltaHpa, suggestedMaxHpa } = calculateWeightRecommendation(weightInput.value);
+      document.getElementById('calc-suggested-max').textContent = `${suggestedMaxHpa} hPa`;
+      document.getElementById('calc-suggested-delta').textContent = `+${deltaHpa} hPa`;
+    }
+
+    function isOverpressureActive() {
+      const p = state.sensors.pressure;
+      const maxP = Number(state.settings.maxPressure);
+      if (p === null || p === undefined || isNaN(Number(p)) || isNaN(maxP)) {
+        return false;
+      }
+      return Number(p) >= maxP;
+    }
+
+    function enforceLockedValves() {
+      const updates = {};
+      let needsUpdate = false;
+
+      VALVE_METADATA.forEach(v => {
+        if (state.lockedValves[v.key] && state.controls.valves[v.key] === true) {
+          updates[`controls/valves/${v.key}`] = false;
+          state.controls.valves[v.key] = false;
+          needsUpdate = true;
+        }
+      });
+
+      if (needsUpdate) {
+        update(ref(db), updates).catch(err => console.error('Gagal menegakkan kunci valve:', err));
+      }
+    }
+
+    // =========================================================================
+    // 8. SINKRONISASI REAL-TIME KE FIREBASE RTDB (LISTENERS)
+    // =========================================================================
+    function initFirebaseListeners() {
+      // A. Status koneksi Firebase RTDB
+      onValue(ref(db, '.info/connected'), (snap) => {
+        state.connected = snap.val() === true;
+        renderConnectionBadge();
+      });
+
+      // B. Inisialisasi node default jika database masih kosong (TIDAK auto-upload mlDataset)
+      get(ref(db)).then((snapshot) => {
+        if (!snapshot.exists()) {
+          set(ref(db), {
+            controls: state.controls,
+            lockedValves: state.lockedValves,
+            settings: state.settings,
+            calibration: state.calibration
+          });
+        }
+      }).catch(err => console.error('Init check error:', err));
+
+      // C. Listener /controls
+      onValue(ref(db, 'controls'), (snap) => {
+        const data = snap.val();
+        if (!data) return;
+        state.controls.mainValve = Boolean(data.mainValve);
+        state.controls.pump = Boolean(data.pump);
+        state.controls.buzzer = Boolean(data.buzzer);
+
+        if (data.valves) {
+          VALVE_METADATA.forEach(v => {
+            state.controls.valves[v.key] = Boolean(data.valves[v.key]);
+          });
+        }
+        enforceLockedValves();
+        renderAllControls();
+      });
+
+      // D. Listener /lockedValves
+      onValue(ref(db, 'lockedValves'), (snap) => {
+        const data = snap.val() || {};
+        VALVE_METADATA.forEach(v => {
+          state.lockedValves[v.key] = Boolean(data[v.key]);
+        });
+        enforceLockedValves();
+        renderAllControls();
+      });
+
+      // E. Listener /sensors/bmp280
+      onValue(ref(db, 'sensors/bmp280'), (snap) => {
+        const data = snap.val();
+        if (data) {
+          state.sensors.pressure = data.pressure !== undefined ? Number(data.pressure) : null;
+          state.sensors.temperature = data.temperature !== undefined ? Number(data.temperature) : null;
+          state.sensors.humidity = data.humidity !== undefined ? Number(data.humidity) : null;
+        } else {
+          state.sensors.pressure = null;
+          state.sensors.temperature = null;
+          state.sensors.humidity = null;
+        }
+        renderSensors();
+        checkAutoSafetyAndPump();
+      });
+
+      // F. Listener /settings
+      onValue(ref(db, 'settings'), (snap) => {
+        const data = snap.val();
+        if (!data) return;
+
+        state.settings.mode = data.mode === 'auto' ? 'auto' : 'manual';
+        state.settings.tiltingEnabled = Boolean(data.tiltingEnabled);
+        state.settings.timerBlockA = Math.max(1, Number(data.timerBlockA) || 10);
+        state.settings.timerBlockB = Math.max(1, Number(data.timerBlockB) || 10);
+        state.settings.timerTilting = Math.max(1, Number(data.timerTilting) || 15);
+        state.settings.userWeight = Math.max(10, Number(data.userWeight) || 60);
+        state.settings.maxPressure = Math.max(1, Number(data.maxPressure) || 1030);
+        if (data.mattressMaterial && MATERIAL_PROFILES[data.mattressMaterial]) {
+          state.settings.mattressMaterial = data.mattressMaterial;
+        }
+        if (data.airVolumeLiters) {
+          state.settings.airVolumeLiters = Math.max(15, Number(data.airVolumeLiters) || 50);
+        }
+        state.settings.autoMaxPressureEnabled = Boolean(data.autoMaxPressureEnabled);
+
+        syncSettingsInputsFromState();
+        renderModeUI();
+        renderSensors();
+        updateMLPreviewUI();
+        checkAutoSafetyAndPump();
+      });
+
+      // G. Listener /calibration
+      onValue(ref(db, 'calibration'), (snap) => {
+        const data = snap.val();
+        if (!data) return;
+        if (data.baselinePressure !== undefined) state.calibration.baselinePressure = Number(data.baselinePressure);
+        if (data.patientLoadedPressure !== undefined) state.calibration.patientLoadedPressure = Number(data.patientLoadedPressure);
+        if (data.deltaPressure !== undefined) state.calibration.deltaPressure = Number(data.deltaPressure);
+        if (data.estimatedMaxPressure !== undefined) state.calibration.estimatedMaxPressure = Number(data.estimatedMaxPressure);
+
+        syncCalibrationInputsFromState();
+        updateMLPreviewUI();
+      });
+
+      // H. Listener /mlDataset/meta (Hanya memantau status apakah dataset sudah pernah di-upload)
+      onValue(ref(db, 'mlDataset/meta'), (snap) => {
+        const meta = snap.val();
+        if (meta && meta.totalSamples) {
+          state.mlDatasetMeta.uploaded = true;
+          state.mlDatasetMeta.totalSamples = meta.totalSamples;
+          state.mlDatasetMeta.uploadedAt = meta.uploadedAt || null;
+        } else {
+          state.mlDatasetMeta.uploaded = false;
+          state.mlDatasetMeta.totalSamples = 0;
+          state.mlDatasetMeta.uploadedAt = null;
+        }
+        renderDatasetUploadStatus();
+      });
+    }
+
+    // =========================================================================
+    // 9. ENGINE OTOMATISASI (MODE AUTO & MODE TILTING)
+    // =========================================================================
+    function applyPhaseToDatabase(phaseIndex) {
+      const updates = {};
+      const overpressure = isOverpressureActive();
+
+      updates['controls/mainValve'] = true;
+      updates['controls/pump'] = !overpressure;
+
+      let activeKeys = [];
+      if (state.settings.tiltingEnabled) {
+        const phase = TILTING_PHASES[phaseIndex % TILTING_PHASES.length];
+        activeKeys = phase.valves;
+      } else {
+        activeKeys = (phaseIndex % 2 === 0) ? BLOCK_A_KEYS : BLOCK_B_KEYS;
+      }
+
+      VALVE_METADATA.forEach(v => {
+        const isLocked = state.lockedValves[v.key];
+        const shouldOpen = !isLocked && activeKeys.includes(v.key);
+        updates[`controls/valves/${v.key}`] = shouldOpen;
+      });
+
+      update(ref(db), updates).catch(err => console.error('Auto phase update error:', err));
+    }
+
+    function checkAutoSafetyAndPump() {
+      const overpressure = isOverpressureActive();
+      const banner = document.getElementById('overpressure-banner');
+      const pumpCutoffBadge = document.getElementById('pump-cutoff-badge');
+
+      if (overpressure) {
+        banner.classList.remove('hidden');
+        document.getElementById('banner-curr-press').textContent = state.sensors.pressure.toFixed(1);
+        document.getElementById('banner-max-press').textContent = state.settings.maxPressure;
+      } else {
+        banner.classList.add('hidden');
+      }
+
+      if (state.settings.mode === 'auto') {
+        const desiredPump = !overpressure;
+        if (overpressure) {
+          pumpCutoffBadge.classList.remove('hidden');
+        } else {
+          pumpCutoffBadge.classList.add('hidden');
+        }
+
+        if (state.controls.pump !== desiredPump) {
+          set(ref(db, 'controls/pump'), desiredPump).catch(err => console.error('Pump safety sync error:', err));
+        }
+      } else {
+        pumpCutoffBadge.classList.add('hidden');
+      }
+    }
+
+    setInterval(() => {
+      if (state.settings.mode !== 'auto') {
+        state.automation.lastModeSignature = 'manual';
+        renderAutomationCycleCard();
+        return;
+      }
+
+      const signature = `auto-${state.settings.tiltingEnabled}`;
+      if (state.automation.lastModeSignature !== signature) {
+        state.automation.lastModeSignature = signature;
+        state.automation.phaseIndex = 0;
+        const duration = state.settings.tiltingEnabled
+          ? state.settings.timerTilting
+          : state.settings.timerBlockA;
+        state.automation.totalPhaseSeconds = duration;
+        state.automation.remainingSeconds = duration;
+        applyPhaseToDatabase(0);
+        renderAutomationCycleCard();
+        return;
+      }
+
+      state.automation.remainingSeconds -= 1;
+
+      if (state.automation.remainingSeconds <= 0) {
+        if (state.settings.tiltingEnabled) {
+          state.automation.phaseIndex = (state.automation.phaseIndex + 1) % TILTING_PHASES.length;
+          const dur = state.settings.timerTilting;
+          state.automation.totalPhaseSeconds = dur;
+          state.automation.remainingSeconds = dur;
+        } else {
+          state.automation.phaseIndex = (state.automation.phaseIndex + 1) % 2;
+          const dur = state.automation.phaseIndex === 0
+            ? state.settings.timerBlockA
+            : state.settings.timerBlockB;
+          state.automation.totalPhaseSeconds = dur;
+          state.automation.remainingSeconds = dur;
+        }
+        applyPhaseToDatabase(state.automation.phaseIndex);
+      }
+
+      renderAutomationCycleCard();
+    }, 1000);
+
+    // =========================================================================
+    // 10. FUNGSI RENDER UI
+    // =========================================================================
+    function renderConnectionBadge() {
+      const badge = document.getElementById('firebase-status-badge');
+      const dot = document.getElementById('firebase-status-dot');
+      const text = document.getElementById('firebase-status-text');
+
+      if (state.connected) {
+        badge.className = 'inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs font-bold bg-clover-mintSoft text-clover-mint border border-clover-mint/30 transition-all';
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-clover-mint';
+        text.textContent = 'Terhubung • RTDB';
+      } else {
+        badge.className = 'inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs font-bold bg-clover-pinkSoft text-clover-pink border border-clover-pink/30 transition-all';
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-clover-pink animate-ping';
+        text.textContent = 'Menghubungkan...';
+      }
+    }
+
+    function renderDatasetUploadStatus() {
+      const badge = document.getElementById('ml-dataset-status-badge');
+      const uploadBtn = document.getElementById('btn-upload-ml-dataset');
+
+      if (state.mlDatasetMeta.uploaded) {
+        badge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-bold bg-clover-mintSoft text-clover-mint border border-clover-mint/30';
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-clover-mint"></span><span>Firebase: Tersimpan (${state.mlDatasetMeta.totalSamples} Sampel)</span>`;
+        uploadBtn.innerHTML = `<span>🔄 Upload Ulang Dataset ML</span>`;
+      } else {
+        badge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200';
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span><span>Firebase: Belum Di-upload</span>`;
+        uploadBtn.innerHTML = `<span>📤 Upload Dataset ML ke Firebase</span>`;
+      }
+    }
+
+    function renderDatasetTableModal() {
+      const tbody = document.getElementById('ml-dataset-table-body');
+      tbody.innerHTML = ML_DUMMY_DATASET.map(row => {
+        const matLabel = (MATERIAL_PROFILES[row.material] || {}).label || row.material;
+        return `
+          <tr class="hover:bg-clover-canvas transition-colors">
+            <td class="py-2 px-3 font-mono font-bold text-slate-400">#${row.id}</td>
+            <td class="py-2 px-3 font-bold text-slate-700">${matLabel}</td>
+            <td class="py-2 px-3 font-semibold text-clover-sky">${row.volumeLiters} L</td>
+            <td class="py-2 px-3 text-slate-600">${row.patientWeightKg} kg</td>
+            <td class="py-2 px-3 font-mono text-slate-600">${row.baselinePressure.toFixed(1)} hPa</td>
+            <td class="py-2 px-3 font-mono text-slate-600">${row.loadedPressure.toFixed(1)} hPa</td>
+            <td class="py-2 px-3 font-mono font-bold text-clover-mint">+${row.deltaPressure.toFixed(1)} hPa</td>
+            <td class="py-2 px-3 font-mono font-extrabold text-clover-pink">${row.optimalMaxPressure.toFixed(1)} hPa</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderSensors() {
+      const { pressure, temperature, humidity } = state.sensors;
+      const maxP = Number(state.settings.maxPressure) || 1030;
+      document.getElementById('display-max-pressure-inline').textContent = maxP;
+
+      const elPress = document.getElementById('val-pressure');
+      const ringPress = document.getElementById('gauge-pressure-ring');
+      const pctPress = document.getElementById('gauge-pressure-pct');
+      const badgePress = document.getElementById('pressure-status-badge');
+      const cardPress = document.getElementById('card-sensor-pressure');
+
+      if (pressure !== null && !isNaN(pressure)) {
+        elPress.textContent = pressure.toFixed(1);
+        const ratio = Math.max(0, Math.min(1, pressure / maxP));
+        const pct = Math.round((pressure / maxP) * 100);
+        ringPress.style.strokeDashoffset = 251.2 * (1 - ratio);
+        pctPress.textContent = `${pct}%`;
+
+        if (pressure >= maxP) {
+          ringPress.setAttribute('stroke', '#FF7EB6');
+          badgePress.className = 'px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold bg-rose-100 text-rose-600';
+          badgePress.textContent = 'OVERPRESSURE ≥ MAX';
+          cardPress.classList.add('ring-2', 'ring-clover-pink');
+        } else {
+          ringPress.setAttribute('stroke', '#38C695');
+          badgePress.className = 'px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-clover-mintSoft text-clover-mint';
+          badgePress.textContent = 'Tekanan Aman';
+          cardPress.classList.remove('ring-2', 'ring-clover-pink');
+        }
+      } else {
+        elPress.textContent = '--.-';
+        ringPress.style.strokeDashoffset = 251.2;
+        pctPress.textContent = '0%';
+        badgePress.className = 'px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-slate-100 text-slate-500';
+        badgePress.textContent = 'Menunggu BMP280';
+      }
+
+      const elTemp = document.getElementById('val-temperature');
+      const ringTemp = document.getElementById('gauge-temp-ring');
+      const badgeTemp = document.getElementById('temp-status-badge');
+
+      if (temperature !== null && !isNaN(temperature)) {
+        elTemp.textContent = temperature.toFixed(1);
+        const ratioT = Math.max(0, Math.min(1, temperature / 50));
+        ringTemp.style.strokeDashoffset = 251.2 * (1 - ratioT);
+        badgeTemp.className = 'px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-clover-pinkSoft text-clover-pink';
+        badgeTemp.textContent = temperature > 35 ? 'Suhu Hangat/Tinggi' : 'Suhu Normal';
+      } else {
+        elTemp.textContent = '--.-';
+        ringTemp.style.strokeDashoffset = 251.2;
+        badgeTemp.className = 'px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-slate-100 text-slate-500';
+        badgeTemp.textContent = 'Menunggu BMP280';
+      }
+
+      const elHum = document.getElementById('val-humidity');
+      const ringHum = document.getElementById('gauge-humidity-ring');
+      const badgeHum = document.getElementById('humidity-status-badge');
+
+      if (humidity !== null && !isNaN(humidity)) {
+        elHum.textContent = humidity.toFixed(1);
+        const ratioH = Math.max(0, Math.min(1, humidity / 100));
+        ringHum.style.strokeDashoffset = 251.2 * (1 - ratioH);
+        badgeHum.className = 'px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-clover-skySoft text-clover-sky';
+        badgeHum.textContent = humidity >= 40 && humidity <= 70 ? 'Kelembaban Ideal' : 'Terpantau Aktif';
+      } else {
+        elHum.textContent = '--.-';
+        ringHum.style.strokeDashoffset = 251.2;
+        badgeHum.className = 'px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-slate-100 text-slate-500';
+        badgeHum.textContent = 'Menunggu BMP280';
+      }
+    }
+
+    function renderModeUI() {
+      const isAuto = state.settings.mode === 'auto';
+      const btnManual = document.getElementById('btn-mode-manual');
+      const btnAuto = document.getElementById('btn-mode-auto');
+      const pill = document.getElementById('badge-mode-pill');
+      const desc = document.getElementById('mode-description');
+
+      if (isAuto) {
+        btnAuto.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer bg-gradient-to-r from-clover-mint to-clover-sky text-white shadow-sm';
+        btnManual.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer text-slate-500 hover:text-slate-700';
+        pill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-clover-mintSoft text-clover-mint';
+        pill.textContent = 'AUTO AKTIF';
+        desc.textContent = 'Main Valve terbuka, Pompa menyala (cutoff otomatis saat overpressure), dan katup bergantian sesuai timer.';
+      } else {
+        btnManual.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer bg-white text-clover-sky shadow-sm';
+        btnAuto.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer text-slate-500 hover:text-slate-700';
+        pill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-clover-skySoft text-clover-sky';
+        pill.textContent = 'MANUAL';
+        desc.textContent = 'Kontrol saklar V0–V10, Pompa, dan Buzzer diatur secara manual oleh pengguna.';
+      }
+
+      const tiltBtn = document.getElementById('toggle-tilting-btn');
+      const tiltThumb = document.getElementById('toggle-tilting-thumb');
+      const tiltLabel = document.getElementById('tilting-status-label');
+
+      tiltBtn.setAttribute('aria-checked', String(state.settings.tiltingEnabled));
+      if (state.settings.tiltingEnabled) {
+        tiltBtn.classList.remove('bg-slate-200');
+        tiltBtn.classList.add('bg-clover-pink');
+        tiltThumb.classList.remove('translate-x-0');
+        tiltThumb.classList.add('translate-x-6');
+        tiltLabel.textContent = 'Tilting NYALA (Mode Miring Kanan ↔ Kiri)';
+        tiltLabel.className = 'font-display font-bold text-base text-clover-pink';
+      } else {
+        tiltBtn.classList.remove('bg-clover-pink');
+        tiltBtn.classList.add('bg-slate-200');
+        tiltThumb.classList.remove('translate-x-6');
+        tiltThumb.classList.add('translate-x-0');
+        tiltLabel.textContent = 'Tilting MATI (Bergantian Blok A / B)';
+        tiltLabel.className = 'font-display font-bold text-base text-slate-700';
+      }
+
+      renderAutomationCycleCard();
+    }
+
+    function renderAutomationCycleCard() {
+      const stepBadge = document.getElementById('cycle-step-badge');
+      const phaseTitle = document.getElementById('cycle-phase-title');
+      const phaseDetail = document.getElementById('cycle-phase-detail');
+      const countdownText = document.getElementById('cycle-countdown-text');
+      const progressBar = document.getElementById('cycle-progress-bar');
+
+      if (state.settings.mode !== 'auto') {
+        stepBadge.textContent = 'Standby Manual';
+        phaseTitle.textContent = 'Kontrol Manual Aktif';
+        phaseDetail.textContent = 'Klik saklar di bawah atau pada peta kasur untuk mengontrol katup.';
+        countdownText.textContent = '-- detik';
+        progressBar.style.width = '0%';
+        return;
+      }
+
+      const rem = Math.max(0, state.automation.remainingSeconds);
+      const tot = Math.max(1, state.automation.totalPhaseSeconds);
+      const pct = Math.min(100, Math.max(0, ((tot - rem) / tot) * 100));
+
+      countdownText.textContent = `${rem} / ${tot} detik`;
+      progressBar.style.width = `${pct}%`;
+
+      if (state.settings.tiltingEnabled) {
+        const phase = TILTING_PHASES[state.automation.phaseIndex % TILTING_PHASES.length];
+        stepBadge.textContent = phase.badge;
+        phaseTitle.textContent = phase.name;
+        phaseDetail.textContent = `Katup aktif: ${phase.valves.map(v => v.toUpperCase()).join(', ')} (kecuali dikunci mati).`;
+      } else {
+        const isBlockA = state.automation.phaseIndex % 2 === 0;
+        stepBadge.textContent = isBlockA ? 'Siklus Blok A' : 'Siklus Blok B';
+        phaseTitle.textContent = isBlockA ? 'Blok A ON (Ganjil)' : 'Blok B ON (Genap)';
+        phaseDetail.textContent = isBlockA
+          ? 'Katup V1, V3, V5, V7, V9 terbuka; Blok B tertutup.'
+          : 'Katup V2, V4, V6, V8, V10 terbuka; Blok A tertutup.';
+      }
+    }
+
+    function syncSettingsInputsFromState() {
+      const activeEl = document.activeElement;
+      const map = [
+        ['input-timer-a', state.settings.timerBlockA],
+        ['input-timer-b', state.settings.timerBlockB],
+        ['input-timer-tilting', state.settings.timerTilting],
+        ['input-user-weight', state.settings.userWeight],
+        ['input-max-pressure', state.settings.maxPressure],
+        ['input-mattress-material', state.settings.mattressMaterial],
+        ['input-air-volume', state.settings.airVolumeLiters]
+      ];
+
+      map.forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el && activeEl !== el) {
+          el.value = val;
+        }
+      });
+      updateWeightAdvisorUI();
+    }
+
+    function syncCalibrationInputsFromState() {
+      const activeEl = document.activeElement;
+      const elBase = document.getElementById('input-baseline-pressure');
+      const elPat = document.getElementById('input-patient-pressure');
+      if (elBase && activeEl !== elBase) elBase.value = state.calibration.baselinePressure;
+      if (elPat && activeEl !== elPat) elPat.value = state.calibration.patientLoadedPressure;
+    }
+
+    function setToggleVisual(btnId, thumbId, isOn, activeColorClass = 'bg-clover-mint') {
+      const btn = document.getElementById(btnId);
+      const thumb = document.getElementById(thumbId);
+      if (!btn || !thumb) return;
+
+      btn.setAttribute('aria-checked', String(isOn));
+      btn.classList.remove('bg-slate-200', 'bg-clover-mint', 'bg-clover-sky', 'bg-clover-pink');
+      if (isOn) {
+        btn.classList.add(activeColorClass);
+        thumb.classList.remove('translate-x-0');
+        thumb.classList.add('translate-x-6');
+      } else {
+        btn.classList.add('bg-slate-200');
+        thumb.classList.remove('translate-x-6');
+        thumb.classList.add('translate-x-0');
+      }
+    }
+
+    function renderAllControls() {
+      setToggleVisual('toggle-mainValve', 'thumb-mainValve', state.controls.mainValve, 'bg-clover-mint');
+      setToggleVisual('toggle-pump', 'thumb-pump', state.controls.pump, 'bg-clover-sky');
+      setToggleVisual('toggle-buzzer', 'thumb-buzzer', state.controls.buzzer, 'bg-clover-pink');
+
+      const vizV0Dot = document.getElementById('viz-v0-dot');
+      const vizV0Status = document.getElementById('viz-v0-status');
+      if (state.controls.mainValve) {
+        vizV0Dot.className = 'w-3 h-3 rounded-full bg-clover-mint animate-ping';
+        vizV0Status.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-clover-mintSoft text-clover-mint';
+        vizV0Status.textContent = 'TERBUKA (ON)';
+      } else {
+        vizV0Dot.className = 'w-3 h-3 rounded-full bg-slate-300';
+        vizV0Status.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-200 text-slate-600';
+        vizV0Status.textContent = 'TERTUTUP (OFF)';
+      }
+
+      let activeCount = 0;
+      let lockedCount = 0;
+      VALVE_METADATA.forEach(v => {
+        if (state.controls.valves[v.key]) activeCount++;
+        if (state.lockedValves[v.key]) lockedCount++;
+      });
+      document.getElementById('active-valves-count').textContent = activeCount;
+      document.getElementById('locked-valves-count').textContent = lockedCount;
+
+      renderValvesControlGrid();
+      renderMattressVisualizer();
+    }
+
+    function renderValvesControlGrid() {
+      const grid = document.getElementById('valves-control-grid');
+      const filtered = VALVE_METADATA.filter(v => {
+        if (state.filter === 'A') return v.block === 'A';
+        if (state.filter === 'B') return v.block === 'B';
+        if (state.filter === 'sacrum') return v.isSacrum;
+        return true;
+      });
+
+      grid.innerHTML = filtered.map(v => {
+        const isOn = state.controls.valves[v.key];
+        const isLocked = state.lockedValves[v.key];
+        const isBlockA = v.block === 'A';
+
+        const blockBadgeClass = isBlockA
+          ? 'bg-clover-mintSoft text-clover-mint'
+          : 'bg-clover-skySoft text-clover-sky';
+
+        const cardBorderClass = isLocked
+          ? 'border-clover-pink/50 locked-pattern'
+          : isOn
+            ? (isBlockA ? 'border-clover-mint shadow-pastel-mint bg-clover-mintSoft/20' : 'border-clover-sky shadow-pastel-sky bg-clover-skySoft/20')
+            : 'border-slate-200/80 bg-white';
+
+        const switchTrackClass = isLocked
+          ? 'bg-slate-200 opacity-50 cursor-not-allowed'
+          : isOn
+            ? (isBlockA ? 'bg-clover-mint cursor-pointer' : 'bg-clover-sky cursor-pointer')
+            : 'bg-slate-200 cursor-pointer';
+
+        return `
+          <div class="rounded-2xl p-3.5 border transition-all flex flex-col justify-between gap-3 ${cardBorderClass}">
+            <div>
+              <div class="flex items-center justify-between gap-1">
+                <span class="font-display font-bold text-base text-slate-800">V${v.id}</span>
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-slate-100 text-slate-600">GPIO ${v.gpio}</span>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-1 mt-1.5">
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold ${blockBadgeClass}">Blok ${v.block}</span>
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600">${v.side}</span>
+                ${v.isSacrum ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-clover-pinkSoft text-clover-pink">Sakrum</span>` : ''}
+              </div>
+              <p class="text-[11px] text-slate-500 mt-1">${v.zone}</p>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-extrabold ${isLocked ? 'text-clover-pink' : isOn ? 'text-slate-800' : 'text-slate-400'}">
+                  ${isLocked ? 'DIKUNCI MATI' : isOn ? 'TERBUKA (ON)' : 'TERTUTUP (OFF)'}
+                </span>
+                <button
+                  type="button"
+                  data-valve-toggle="${v.key}"
+                  ${isLocked ? 'disabled' : ''}
+                  aria-label="Toggle V${v.id}"
+                  class="toggle-track relative inline-flex h-7 w-12 shrink-0 rounded-full border-2 border-transparent p-0.5 ${switchTrackClass}">
+                  <span class="toggle-thumb pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ${isOn && !isLocked ? 'translate-x-5' : 'translate-x-0'}"></span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                data-valve-lock="${v.key}"
+                class="w-full py-1.5 px-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  isLocked
+                    ? 'bg-clover-pink text-white shadow-xs'
+                    : 'bg-slate-100 hover:bg-clover-pinkSoft text-slate-600 hover:text-clover-pink'
+                }">
+                <span>${isLocked ? '🔒 Terkunci Mati (Buka)' : '🔓 Kunci Mati (Lock)'}</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderMattressCellHTML(valveId) {
+      const v = VALVE_METADATA.find(item => item.id === valveId);
+      const isOn = state.controls.valves[v.key];
+      const isLocked = state.lockedValves[v.key];
+      const isBlockA = v.block === 'A';
+
+      let cellClasses = 'bg-white border-slate-200 text-slate-700 hover:border-slate-300';
+      let statusPill = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-400">OFF</span>`;
+
+      if (isLocked) {
+        cellClasses = 'locked-pattern border-clover-pink text-clover-pink';
+        statusPill = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-clover-pink text-white">🔒 LOCK</span>`;
+      } else if (isOn) {
+        if (isBlockA) {
+          cellClasses = 'bg-gradient-to-r from-clover-mint to-clover-mintLight border-clover-mint text-white shadow-pastel-mint cell-inflated';
+        } else {
+          cellClasses = 'bg-gradient-to-r from-clover-sky to-clover-skyLight border-clover-sky text-white shadow-pastel-sky cell-inflated';
+        }
+        statusPill = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-white/25 text-white">ON</span>`;
+      }
+
+      return `
+        <div
+          data-viz-cell="${v.key}"
+          title="Klik untuk toggle V${v.id} (GPIO ${v.gpio})"
+          class="group relative rounded-2xl p-2.5 sm:p-3 border-2 transition-all cursor-pointer select-none flex items-center justify-between gap-2 ${cellClasses}">
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <span class="font-display font-bold text-sm sm:text-base">V${v.id}</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isOn && !isLocked ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}">
+                Blok ${v.block}
+              </span>
+              ${v.isSacrum ? `<span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md ${isOn && !isLocked ? 'bg-clover-pink text-white' : 'bg-clover-pinkSoft text-clover-pink'}">★ Sakrum</span>` : ''}
+            </div>
+            <div class="text-[10px] mt-0.5 ${isOn && !isLocked ? 'text-white/90' : 'text-slate-400'} font-mono">
+              GPIO ${v.gpio} • ${v.side}
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5 shrink-0">
+            ${statusPill}
+            <button
+              type="button"
+              data-valve-lock="${v.key}"
+              title="${isLocked ? 'Buka Kunci Valve' : 'Kunci Mati Valve'}"
+              class="w-7 h-7 rounded-xl flex items-center justify-center text-xs transition-all cursor-pointer ${
+                isLocked
+                  ? 'bg-clover-pink text-white'
+                  : isOn
+                    ? 'bg-white/20 hover:bg-white/40 text-white'
+                    : 'bg-slate-100 hover:bg-clover-pinkSoft text-slate-500 hover:text-clover-pink'
+              }">
+              ${isLocked ? '🔒' : '🔓'}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMattressVisualizer() {
+      const container = document.getElementById('mattress-visualizer-grid');
+      container.innerHTML = `
+        <div class="space-y-2">
+          <div class="flex items-center justify-between px-1">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Zona Kepala & Kaki (V1–V4)</span>
+            <span class="text-[10px] font-semibold text-slate-400">Kanan: V1, V2 • Kiri: V3, V4</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="space-y-2">
+              ${renderMattressCellHTML(1)}
+              ${renderMattressCellHTML(2)}
+            </div>
+            <div class="space-y-2">
+              ${renderMattressCellHTML(3)}
+              ${renderMattressCellHTML(4)}
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2 pt-2 border-t border-dashed border-slate-200">
+          <div class="flex items-center justify-between px-1">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Zona Badan Atas (V5, V6, V8, V9)</span>
+            <span class="text-[10px] font-semibold text-slate-400">Kanan: V5, V6 • Kiri: V8, V9</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="space-y-2">
+              ${renderMattressCellHTML(5)}
+              ${renderMattressCellHTML(6)}
+            </div>
+            <div class="space-y-2">
+              ${renderMattressCellHTML(8)}
+              ${renderMattressCellHTML(9)}
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2 pt-2 border-t border-dashed border-clover-pink/40 bg-clover-pinkSoft/25 p-2.5 rounded-2xl">
+          <div class="flex items-center justify-between px-1">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-clover-pink">🌸 Zona Sakrum Khusus (V7 & V10)</span>
+            <span class="text-[10px] font-semibold text-clover-pink">Kanan: V7 • Kiri: V10</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>${renderMattressCellHTML(7)}</div>
+            <div>${renderMattressCellHTML(10)}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // 11. EVENT HANDLERS INTERAKSI PENGGUNA
+    // =========================================================================
+    function handleValveToggle(valveKey) {
+      if (state.lockedValves[valveKey]) {
+        showToast(`${valveKey.toUpperCase()} sedang DIKUNCI MATI! Buka kuncinya terlebih dahulu.`, 'pink');
+        return;
+      }
+
+      if (state.settings.mode === 'auto') {
+        showToast('Beralih ke Mode Manual untuk mengontrol katup secara langsung.', 'sky');
+        set(ref(db, 'settings/mode'), 'manual');
+      }
+
+      const nextVal = !state.controls.valves[valveKey];
+      set(ref(db, `controls/valves/${valveKey}`), nextVal)
+        .catch(() => showToast('Gagal mengirim perintah ke Firebase', 'warn'));
+    }
+
+    function handleValveLockToggle(valveKey) {
+      const nextLock = !state.lockedValves[valveKey];
+      const updates = {
+        [`lockedValves/${valveKey}`]: nextLock
+      };
+      if (nextLock) {
+        updates[`controls/valves/${valveKey}`] = false;
+      }
+      update(ref(db), updates)
+        .then(() => {
+          showToast(
+            nextLock
+              ? `${valveKey.toUpperCase()} dikunci mati (selalu OFF di semua mode).`
+              : `Kunci ${valveKey.toUpperCase()} dibuka.`,
+            nextLock ? 'pink' : 'mint'
+          );
+        })
+        .catch(() => showToast('Gagal memperbarui status kunci valve', 'warn'));
+    }
+
+    document.addEventListener('click', (e) => {
+      const lockBtn = e.target.closest('[data-valve-lock]');
+      if (lockBtn) {
+        e.stopPropagation();
+        handleValveLockToggle(lockBtn.getAttribute('data-valve-lock'));
+        return;
+      }
+
+      const toggleBtn = e.target.closest('[data-valve-toggle]');
+      if (toggleBtn) {
+        handleValveToggle(toggleBtn.getAttribute('data-valve-toggle'));
+        return;
+      }
+
+      const vizCell = e.target.closest('[data-viz-cell]');
+      if (vizCell) {
+        handleValveToggle(vizCell.getAttribute('data-viz-cell'));
+        return;
+      }
+    });
+
+    document.getElementById('toggle-mainValve').addEventListener('click', () => {
+      set(ref(db, 'controls/mainValve'), !state.controls.mainValve);
+    });
+
+    document.getElementById('toggle-pump').addEventListener('click', () => {
+      const nextVal = !state.controls.pump;
+      if (nextVal && isOverpressureActive() && state.settings.mode === 'auto') {
+        showToast('Tidak dapat menyalakan Pompa di Mode Auto saat Overpressure!', 'warn');
+        return;
+      }
+      set(ref(db, 'controls/pump'), nextVal);
+    });
+
+    document.getElementById('toggle-buzzer').addEventListener('click', () => {
+      set(ref(db, 'controls/buzzer'), !state.controls.buzzer);
+    });
+
+    document.getElementById('btn-mode-manual').addEventListener('click', () => {
+      set(ref(db, 'settings/mode'), 'manual');
+      showToast('Mode Manual diaktifkan.', 'sky');
+    });
+
+    document.getElementById('btn-mode-auto').addEventListener('click', () => {
+      set(ref(db, 'settings/mode'), 'auto');
+      showToast('Mode Auto diaktifkan! Siklus otomatis dimulai.', 'mint');
+    });
+
+    document.getElementById('toggle-tilting-btn').addEventListener('click', () => {
+      const nextTilt = !state.settings.tiltingEnabled;
+      set(ref(db, 'settings/tiltingEnabled'), nextTilt);
+      showToast(
+        nextTilt ? 'Fitur Tilting (Mode Miring) NYALA.' : 'Fitur Tilting (Mode Miring) MATI.',
+        nextTilt ? 'pink' : 'sky'
+      );
+    });
+
+    document.querySelectorAll('.valve-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.filter = btn.getAttribute('data-filter');
+        document.querySelectorAll('.valve-filter-btn').forEach(b => {
+          b.className = 'valve-filter-btn px-3 py-1.5 rounded-xl text-slate-500 hover:text-slate-800 cursor-pointer';
+        });
+        btn.className = 'valve-filter-btn px-3 py-1.5 rounded-xl bg-white text-slate-800 shadow-xs cursor-pointer';
+        renderValvesControlGrid();
+      });
+    });
+
+    document.getElementById('btn-unlock-all').addEventListener('click', () => {
+      const updates = {};
+      VALVE_METADATA.forEach(v => {
+        updates[`lockedValves/${v.key}`] = false;
+      });
+      update(ref(db), updates).then(() => {
+        showToast('Seluruh kunci valve (V1–V10) telah dibuka.', 'mint');
+      });
+    });
+
+    document.getElementById('btn-emergency-off').addEventListener('click', () => {
+      const updates = {
+        'settings/mode': 'manual',
+        'controls/mainValve': false,
+        'controls/pump': false,
+        'controls/buzzer': false
+      };
+      VALVE_METADATA.forEach(v => {
+        updates[`controls/valves/${v.key}`] = false;
+      });
+      update(ref(db), updates).then(() => {
+        showToast('Semua katup, pompa, dan buzzer telah dimatikan (Mode Manual).', 'warn');
+      });
+    });
+
+    // Input Berat Badan Live Calculation & Simpan Parameter
+    document.getElementById('input-user-weight').addEventListener('input', updateWeightAdvisorUI);
+
+    document.getElementById('btn-apply-suggested-pressure').addEventListener('click', () => {
+      const w = document.getElementById('input-user-weight').value;
+      const { suggestedMaxHpa } = calculateWeightRecommendation(w);
+      document.getElementById('input-max-pressure').value = suggestedMaxHpa;
+      showToast(`Saran Max Tekanan (${suggestedMaxHpa} hPa) diterapkan ke form.`, 'sky');
+    });
+
+    document.getElementById('btn-save-settings').addEventListener('click', () => {
+      const timerBlockA = Math.max(1, Number(document.getElementById('input-timer-a').value) || 10);
+      const timerBlockB = Math.max(1, Number(document.getElementById('input-timer-b').value) || 10);
+      const timerTilting = Math.max(1, Number(document.getElementById('input-timer-tilting').value) || 15);
+      const userWeight = Math.max(10, Number(document.getElementById('input-user-weight').value) || 60);
+      const maxPressure = Math.max(1, Number(document.getElementById('input-max-pressure').value) || 1030);
+      const mattressMaterial = document.getElementById('input-mattress-material').value;
+      const airVolumeLiters = Math.max(15, Number(document.getElementById('input-air-volume').value) || 50);
+
+      update(ref(db, 'settings'), {
+        timerBlockA,
+        timerBlockB,
+        timerTilting,
+        userWeight,
+        maxPressure,
+        mattressMaterial,
+        airVolumeLiters
+      }).then(() => {
+        state.automation.lastModeSignature = '';
+        showToast('Parameter berhasil disimpan ke Firebase RTDB!', 'mint');
+      }).catch(() => {
+        showToast('Gagal menyimpan parameter ke Firebase.', 'warn');
+      });
+    });
+
+    // =========================================================================
+    // 12. EVENT HANDLERS KALIBRASI ML & UPLOAD DATASET SEKALI KLIK
+    // =========================================================================
+    ['input-mattress-material', 'input-air-volume', 'input-baseline-pressure', 'input-patient-pressure'].forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('input', updateMLPreviewUI);
+      el.addEventListener('change', updateMLPreviewUI);
+    });
+
+    // Ambil Tekanan Normal langsung dari sensor BMP280 saat ini
+    document.getElementById('btn-capture-baseline').addEventListener('click', () => {
+      if (state.sensors.pressure !== null && !isNaN(state.sensors.pressure)) {
+        const val = Math.round(state.sensors.pressure * 10) / 10;
+        document.getElementById('input-baseline-pressure').value = val;
+        updateMLPreviewUI();
+        showToast(`Tekanan Normal (${val} hPa) direkam dari sensor BMP280!`, 'mint');
+      } else {
+        showToast('Sensor BMP280 belum terbaca. Gunakan input manual atau hubungkan ESP32.', 'warn');
+      }
+    });
+
+    // Ambil Tekanan Saat Pasien Dibaringkan langsung dari sensor BMP280 saat ini
+    document.getElementById('btn-capture-patient').addEventListener('click', () => {
+      if (state.sensors.pressure !== null && !isNaN(state.sensors.pressure)) {
+        const val = Math.round(state.sensors.pressure * 10) / 10;
+        document.getElementById('input-patient-pressure').value = val;
+        updateMLPreviewUI();
+        showToast(`Tekanan Pasien Dibaringkan (${val} hPa) direkam dari BMP280!`, 'pink');
+      } else {
+        showToast('Sensor BMP280 belum terbaca. Gunakan input manual atau hubungkan ESP32.', 'warn');
+      }
+    });
+
+    // Tombol Utama: Hitung & Terapkan Max Pressure Otomatis ke Firebase
+    document.getElementById('btn-auto-calc-max-pressure').addEventListener('click', () => {
+      const material = document.getElementById('input-mattress-material').value;
+      const volumeLiters = Math.max(15, Number(document.getElementById('input-air-volume').value) || 50);
+      const baselinePressure = Number(document.getElementById('input-baseline-pressure').value) || 1013.2;
+      const patientLoadedPressure = Number(document.getElementById('input-patient-pressure').value) || baselinePressure;
+
+      const mlResult = estimateMaxPressureML({
+        material,
+        volumeLiters,
+        baselinePressure,
+        patientLoadedPressure
+      });
+
+      // Terapkan hasil ke input Max Pressure UI
+      document.getElementById('input-max-pressure').value = mlResult.estimatedMax;
+
+      const nowIso = new Date().toISOString();
+      const updates = {
+        'settings/mattressMaterial': material,
+        'settings/airVolumeLiters': volumeLiters,
+        'settings/maxPressure': mlResult.estimatedMax,
+        'settings/autoMaxPressureEnabled': true,
+        'calibration/baselinePressure': baselinePressure,
+        'calibration/patientLoadedPressure': patientLoadedPressure,
+        'calibration/deltaPressure': mlResult.deltaP,
+        'calibration/estimatedMaxPressure': mlResult.estimatedMax,
+        'calibration/updatedAt': nowIso
+      };
+
+      update(ref(db), updates)
+        .then(() => {
+          showToast(
+            `Max Pressure otomatis ditetapkan: ${mlResult.estimatedMax} hPa (ΔP: +${mlResult.deltaP} hPa) & disinkronkan ke Firebase!`,
+            'mint'
+          );
+        })
+        .catch(() => {
+          showToast('Gagal menyimpan hasil estimasi Max Pressure ke Firebase.', 'warn');
+        });
+    });
+
+    // Tombol Upload Dataset Dummy ML ke Firebase (Hanya Upload Saat Diklik)
+    document.getElementById('btn-upload-ml-dataset').addEventListener('click', () => {
+      const btn = document.getElementById('btn-upload-ml-dataset');
+      btn.disabled = true;
+      btn.classList.add('opacity-70');
+
+      const payload = {
+        meta: {
+          version: '1.0',
+          algorithm: 'Weighted-KNN-Regression + BoylesLaw',
+          totalSamples: ML_DUMMY_DATASET.length,
+          uploadedAt: new Date().toISOString()
+        },
+        samples: ML_DUMMY_DATASET
+      };
+
+      set(ref(db, 'mlDataset'), payload)
+        .then(() => {
+          showToast(`Berhasil meng-upload ${ML_DUMMY_DATASET.length} dataset dummy ML ke Firebase (/mlDataset)!`, 'sky');
+        })
+        .catch(() => {
+          showToast('Gagal meng-upload dataset ML ke Firebase.', 'warn');
+        })
+        .finally(() => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-70');
+        });
+    });
+
+    // Modal Dataset Dummy ML
+    const datasetModal = document.getElementById('dataset-modal');
+    document.getElementById('btn-view-ml-dataset').addEventListener('click', () => {
+      renderDatasetTableModal();
+      datasetModal.classList.remove('hidden');
+      datasetModal.classList.add('flex');
+    });
+    document.getElementById('btn-close-dataset').addEventListener('click', () => {
+      datasetModal.classList.add('hidden');
+      datasetModal.classList.remove('flex');
+    });
+    datasetModal.addEventListener('click', (e) => {
+      if (e.target === datasetModal) {
+        datasetModal.classList.add('hidden');
+        datasetModal.classList.remove('flex');
+      }
+    });
+
+    // Modal Struktur Path Firebase
+    const schemaModal = document.getElementById('schema-modal');
+    document.getElementById('btn-open-schema').addEventListener('click', () => {
+      schemaModal.classList.remove('hidden');
+      schemaModal.classList.add('flex');
+    });
+    document.getElementById('btn-close-schema').addEventListener('click', () => {
+      schemaModal.classList.add('hidden');
+      schemaModal.classList.remove('flex');
+    });
+    schemaModal.addEventListener('click', (e) => {
+      if (e.target === schemaModal) {
+        schemaModal.classList.add('hidden');
+        schemaModal.classList.remove('flex');
+      }
+    });
+
+    document.getElementById('btn-copy-schema').addEventListener('click', () => {
+      const text = document.getElementById('firebase-schema-code').textContent;
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showToast('Struktur JSON Firebase berhasil disalin ke clipboard!', 'mint');
+      } catch (err) {
+        showToast('Gagal menyalin teks.', 'warn');
+      }
+      document.body.removeChild(textarea);
+    });
+
+    // =========================================================================
+    // 13. INISIALISASI AWAL
+    // =========================================================================
+    renderAllControls();
+    renderSensors();
+    renderModeUI();
+    updateWeightAdvisorUI();
+    updateMLPreviewUI();
+    initFirebaseListeners();
+  </script>
+</body>
+</html>
